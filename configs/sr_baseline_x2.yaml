@@ -1,0 +1,28 @@
+experiment_name: unet_sr_x2_baseline
+seed: 42
+data:
+  train_hr_dir: ./data/sr/train_hr
+  val_hr_dir: ./data/sr/val_hr
+  test_hr_dir: ./data/sr/test_hr
+  scale: 2
+  train_crop_size: 192
+  eval_crop_size: 256
+  batch_size: 64
+  num_workers: 4
+model:
+  in_channels: 3
+  out_channels: 3
+  base_channels: 64
+train:
+  epochs: 30
+  lr: 0.0002
+  weight_decay: 0.0
+  save_path: ./checkpoints/unet_sr_x2_baseline.pt
+benchmark:
+  warmup_steps: 10
+  measure_steps: 50
+  use_fp16: false
+  device: auto
+output:
+  eval_metrics_path: ./results/sr_eval_metrics.json
+  benchmark_metrics_path: ./results/sr_benchmark_metrics.json
