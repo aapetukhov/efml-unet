@@ -13,7 +13,7 @@ experiment_name: sr_unet_x3
 seed: 42
 
 trainer:
-  device: auto
+  device: cuda
   epochs: 40
   log_every: 5
   val_every: 1

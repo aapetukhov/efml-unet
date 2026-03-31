@@ -41,7 +41,7 @@ class BaseTrainer:
         self.grad_clip = config.trainer.grad_clip
         self.val_every = config.trainer.val_every
         self.epochs = config.trainer.epochs
-        self.scaler = GradScaler(device_type="cuda", enabled=config.trainer.mixed_precision and device.startswith("cuda"))
+        self.scaler = GradScaler(device="cuda", enabled=config.trainer.mixed_precision and device.startswith("cuda"))
         self.global_step = 0
         self.checkpoint_path = prepare_checkpoint_path(config)
 
