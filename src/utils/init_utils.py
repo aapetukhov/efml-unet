@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 import numpy as np
 import torch
 from hydra.utils import to_absolute_path
+from omegaconf import DictConfig
 
 from src import PROJECT_ROOT
 
@@ -43,4 +44,6 @@ def save_checkpoint(path: Path, payload: Dict[str, Any]) -> None:
 def load_checkpoint(path: Path, map_location: Optional[str] = None) -> Dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Checkpoint not found: {path}")
-    return torch.load(path, map_location=map_location)
+    # Allow DictConfig and other OmegaConf objects inside checkpoint
+    torch.serialization.add_safe_globals([DictConfig])
+    return torch.load(path, map_location=map_location, weights_only=False)
