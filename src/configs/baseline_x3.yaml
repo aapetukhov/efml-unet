@@ -1,0 +1,33 @@
+# Training config for scale x3
+
+defaults:
+  - dataloader: sr
+  - datasets: sr
+  - metrics: sr
+  - model: unet
+  - transforms: sr
+  - writer: console
+  - _self_
+
+experiment_name: sr_unet_x3
+seed: 42
+
+trainer:
+  device: auto
+  epochs: 40
+  log_every: 20
+  val_every: 1
+  grad_clip: 1.0
+  mixed_precision: false
+  save_dir: checkpoints
+  save_name: sr_unet_x3.pt
+
+optimization:
+  lr: 1e-3
+  weight_decay: 1e-6
+  scheduler:
+    name: cosine
+    T_max: null
+
+criterion:
+  name: l1

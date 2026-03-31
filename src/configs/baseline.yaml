@@ -1,0 +1,34 @@
+# Hydra baseline config for SR training
+# Default composition keeps configs modular to avoid copy-pasting between experiments
+
+defaults:
+  - dataloader: sr
+  - datasets: sr
+  - metrics: sr
+  - model: unet
+  - transforms: sr
+  - writer: console
+  - _self_
+
+experiment_name: sr_unet_x2
+seed: 42
+
+trainer:
+  device: auto          # 'auto' | 'cpu' | 'cuda:0'
+  epochs: 20
+  log_every: 20
+  val_every: 1
+  grad_clip: 1.0
+  mixed_precision: false
+  save_dir: checkpoints
+  save_name: sr_unet_x2.pt
+
+optimization:
+  lr: 1e-3
+  weight_decay: 1e-6
+  scheduler:
+    name: cosine
+    T_max: null  # if null, defaults to number of epochs
+
+criterion:
+  name: l1
