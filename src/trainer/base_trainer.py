@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import torch
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from tqdm.auto import tqdm
 
 from src.metrics import MetricTracker
@@ -41,7 +41,7 @@ class BaseTrainer:
         self.grad_clip = config.trainer.grad_clip
         self.val_every = config.trainer.val_every
         self.epochs = config.trainer.epochs
-        self.scaler = GradScaler(enabled=config.trainer.mixed_precision and device.startswith("cuda"))
+        self.scaler = GradScaler(device_type="cuda", enabled=config.trainer.mixed_precision and device.startswith("cuda"))
         self.global_step = 0
         self.checkpoint_path = prepare_checkpoint_path(config)
 
@@ -51,7 +51,11 @@ class BaseTrainer:
     def _compute_metrics(self, prediction: torch.Tensor, target: torch.Tensor, stage: str) -> Dict[str, float]:
         values = {}
         for metric in self.metrics.get(stage, []):
-            values[metric.name] = metric(prediction, target)
+            # prediction, target: (B, C, H, W). Compute mean over batch.
+            batch_vals = []
+            for pred_i, targ_i in zip(prediction, target):
+                batch_vals.append(metric(pred_i, targ_i))
+            values[metric.name] = float(sum(batch_vals) / max(len(batch_vals), 1))
         return values
 
     def _train_val_epoch(self, dataloader, training: bool, epoch: int) -> Dict[str, float]:
@@ -66,7 +70,7 @@ class BaseTrainer:
             lr = batch["lr"]
             hr = batch["hr"]
 
-            with autocast(enabled=self.scaler.is_enabled() and training):
+            with autocast(device_type="cuda" if self.device.startswith("cuda") else "cpu", enabled=self.scaler.is_enabled() and training):
                 prediction = self.model(lr)
                 losses = self.criterion(prediction, hr)
                 loss = losses["loss"]
