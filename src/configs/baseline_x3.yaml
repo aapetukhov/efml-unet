@@ -15,7 +15,7 @@ seed: 42
 trainer:
   device: auto
   epochs: 40
-  log_every: 20
+  log_every: 5
   val_every: 1
   grad_clip: 1.0
   mixed_precision: false

@@ -1,3 +1,3 @@
-from src.model.baseline_model import UNetSR, build_model
+from src.model.baseline_model import SRUNet, build_model
 
-__all__ = ["UNetSR", "build_model"]
+__all__ = ["SRUNet", "build_model"]
