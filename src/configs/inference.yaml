@@ -1,0 +1,20 @@
+# Inference/eval config
+
+defaults:
+  - dataloader: sr
+  - datasets: sr
+  - metrics: sr
+  - model: unet
+  - transforms: sr
+  - writer: console
+  - _self_
+
+seed: 42
+experiment_name: sr_unet_x2
+
+device: auto
+checkpoint_path: checkpoints/sr_unet_x2.pt
+batch_size: 1
+num_workers: 2
+save_predictions: true
+predictions_dir: results/preds
