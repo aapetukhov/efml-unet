@@ -78,11 +78,12 @@ class OutConv(nn.Module):
 
 
 class SRUNet(nn.Module):
-    def __init__(self, n_channels=3, n_classes=3, base_channels=64, bilinear=True):
+    def __init__(self, n_channels=3, n_classes=3, base_channels=64, bilinear=True, residual=True):
         super().__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.bilinear = bilinear
+        self.residual = residual and n_channels == n_classes
         bc = base_channels
 
         self.inc = DoubleConv(n_channels, bc)
@@ -98,7 +99,8 @@ class SRUNet(nn.Module):
         self.outc = OutConv(bc, n_classes)
 
     def forward(self, x):
-        x1 = self.inc(x)
+        x_in = x
+        x1 = self.inc(x_in)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
         x4 = self.down3(x3)
@@ -108,6 +110,9 @@ class SRUNet(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         logits = self.outc(x)
+        if self.residual:
+            # Global skip preserves low-frequency/color information
+            logits = logits + x_in
         # keep logits unclamped; downstream code can clamp/denormalize as needed
         return logits
 
@@ -118,4 +123,5 @@ def build_model(config):
         n_classes=config.model.out_channels,
         base_channels=config.model.base_channels,
         bilinear=getattr(config.model, "bilinear", True),
+        residual=getattr(config.model, "residual", True),
     )
