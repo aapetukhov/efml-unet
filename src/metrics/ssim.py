@@ -1,24 +1,10 @@
 from __future__ import annotations
 
-import math
-
 import numpy as np
 import torch
 from skimage.metrics import structural_similarity
 
 from src.metrics.base_metric import BaseMetric
-
-
-class PSNRMetric(BaseMetric):
-    name = "psnr"
-
-    def __call__(self, prediction: torch.Tensor, target: torch.Tensor) -> float:
-        prediction = prediction.clamp(0.0, 1.0)
-        target = target.clamp(0.0, 1.0)
-        mse = torch.mean((prediction - target) ** 2).item()
-        if mse == 0:
-            return float("inf")
-        return 10.0 * math.log10(1.0 / mse)
 
 
 class SSIMMetric(BaseMetric):

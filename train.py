@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 from src.datasets import get_dataloaders
 from src.logger import get_logger
 from src.loss import L1LossWrapper
-from src.metrics import PSNRMetric, SSIMMetric
+from src.metrics import SSIMMetric
 from src.model import build_model
 from src.trainer import Trainer
 from src.utils import select_device, set_random_seed
@@ -18,7 +18,6 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 def build_metrics(config, section: str):
     metric_map = {
-        "psnr": PSNRMetric,
         "ssim": SSIMMetric,
     }
     metrics = []
