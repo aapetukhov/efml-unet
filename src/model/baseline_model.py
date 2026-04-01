@@ -108,7 +108,8 @@ class SRUNet(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         logits = self.outc(x)
-        return torch.clamp(logits, 0.0, 1.0)
+        # keep logits unclamped; downstream code can clamp/denormalize as needed
+        return logits
 
 
 def build_model(config):

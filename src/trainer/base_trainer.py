@@ -114,7 +114,7 @@ class BaseTrainer:
         self.logger.info(f"Saved checkpoint to {self.checkpoint_path}")
 
     def train(self):
-        best_psnr = -1.0
+        best_ssim = -1.0
         for epoch in range(1, self.epochs + 1):
             train_metrics = self._train_val_epoch(self.train_loader, training=True, epoch=epoch)
             self.logger.info(f"Epoch {epoch} train: {train_metrics}")
@@ -124,14 +124,14 @@ class BaseTrainer:
                 with torch.no_grad():
                     val_metrics = self._train_val_epoch(self.val_loader, training=False, epoch=epoch)
                 self.logger.info(f"Epoch {epoch} val: {val_metrics}")
-                current_psnr = val_metrics.get("psnr", -1.0)
-                if current_psnr > best_psnr:
-                    best_psnr = current_psnr
-                    self._save_checkpoint(epoch, extra={"best_psnr": best_psnr})
+                current_ssim = val_metrics.get("ssim", -1.0)
+                if current_ssim > best_ssim:
+                    best_ssim = current_ssim
+                    self._save_checkpoint(epoch, extra={"best_ssim": best_ssim})
 
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
 
-        if best_psnr < 0:
+        if best_ssim < 0:
             # still save the latest weights
             self._save_checkpoint(self.epochs)

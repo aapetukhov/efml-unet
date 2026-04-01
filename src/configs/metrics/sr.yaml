@@ -1,12 +1,8 @@
 # Metrics to compute during train/validation and inference
 train:
-  - name: psnr
-    reduce: mean
   - name: ssim
     reduce: mean
 
 inference:
-  - name: psnr
-    reduce: mean
   - name: ssim
     reduce: mean

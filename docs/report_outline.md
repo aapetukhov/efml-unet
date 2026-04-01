@@ -14,13 +14,13 @@
 - Датасет: открытый набор HR-изображений, разложенный на train / val / test
 - Scale factor: x2
 - Генерация LR: bicubic downsampling из HR, затем bicubic upsampling обратно до размера HR для подачи в модель
-- Метрики качества: PSNR и SSIM
+- Метрика качества: SSIM
 
 ## 4. Первый эксперимент
 - Подготовить train и validation split
 - Генерировать LR-входы на лету из HR-изображений
 - Обучить baseline-модель
-- Посчитать PSNR и SSIM на validation
+- Посчитать SSIM на validation
 - Замерить PyTorch inference в FP32 и FP16
 
 ## 5. План всех экспериментов
@@ -44,7 +44,7 @@
 - размеры train / val / test split
 - scale factor и способ генерации LR
 - число эпох, optimizer, learning rate
-- validation PSNR
+- validation SSIM
 - validation SSIM
 - FP32 latency / throughput
 - FP16 latency / throughput
