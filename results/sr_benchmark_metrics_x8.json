@@ -1,0 +1,15 @@
+{
+  "latency_mean_ms": 5.149466637521982,
+  "latency_std_ms": 0.4266712406804444,
+  "latency_p50_ms": 5.020946497097611,
+  "latency_p95_ms": 6.225797184742987,
+  "throughput_images_per_s": 194.194869176047,
+  "psnr": 23.863260241958837,
+  "ssim": 0.6784108245372772,
+  "measured_steps": 50,
+  "total_images": 50,
+  "experiment_name": "unet_sr_x4_baseline",
+  "device": "cuda",
+  "use_fp16": true,
+  "scale": 4
+}
