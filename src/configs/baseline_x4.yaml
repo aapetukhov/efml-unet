@@ -1,0 +1,33 @@
+# Training config for scale x4
+
+defaults:
+  - dataloader: sr
+  - datasets: sr_x4
+  - metrics: sr
+  - model: unet
+  - transforms: sr
+  - writer: console
+  - _self_
+
+experiment_name: sr_unet_x4
+seed: 42
+
+trainer:
+  device: cuda
+  epochs: 50
+  log_every: 5
+  val_every: 1
+  grad_clip: 1.0
+  mixed_precision: true
+  save_dir: checkpoints
+  save_name: sr_unet_x4.pt
+
+optimization:
+  lr: 1e-3
+  weight_decay: 1e-6
+  scheduler:
+    name: cosine
+    T_max: null
+
+criterion:
+  name: l1
