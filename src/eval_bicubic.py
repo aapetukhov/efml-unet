@@ -7,12 +7,12 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
 from src.config import load_config
 from src.data import build_dataset
 from src.metrics import compute_psnr, compute_ssim
-from src.modeling import build_model, prepare_model_for_inference
 
 
 def set_seed(seed: int) -> None:
@@ -23,10 +23,10 @@ def set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
-def resolve_device(device_name: str) -> torch.device:
-    if device_name == "auto":
-        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    return torch.device(device_name)
+def bicubic_upsample(lr_images: torch.Tensor, scale: int) -> torch.Tensor:
+    """Upsample images using bicubic interpolation."""
+    b, c, h, w = lr_images.shape
+    return F.interpolate(lr_images, size=(h * scale, w * scale), mode='bicubic', align_corners=False)
 
 
 def main() -> None:
@@ -36,7 +36,6 @@ def main() -> None:
 
     config = load_config(args.config)
     set_seed(config["seed"])
-    device = resolve_device(config["benchmark"]["device"])
 
     dataset = build_dataset(
         lr_dir=config["data"]["val_lr_dir"],
@@ -45,55 +44,48 @@ def main() -> None:
         crop_size=config["data"]["eval_crop_size"],
         training=False,
     )
+
     dataloader = DataLoader(
         dataset,
         batch_size=1,
         shuffle=False,
         num_workers=config["data"]["num_workers"],
-        pin_memory=device.type == "cuda",
-    )
-
-    model = build_model(
-        in_channels=config["model"]["in_channels"],
-        out_channels=config["model"]["out_channels"],
-        base_channels=config["model"]["base_channels"],
-        scale=config["data"]["scale"],
-    )
-    checkpoint = torch.load(config["train"]["save_path"], map_location="cpu")
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model = prepare_model_for_inference(
-        model=model,
-        device=device,
-        use_fp16=config["benchmark"]["use_fp16"],
+        pin_memory=False,
     )
 
     psnr_scores = []
     ssim_scores = []
-    with torch.inference_mode():
-        for lr_images, hr_images, _ in dataloader:
-            lr_images = lr_images.to(device, non_blocking=True)
-            hr_images = hr_images.to(device, non_blocking=True)
-            if config["benchmark"]["use_fp16"] and device.type == "cuda":
-                lr_images = lr_images.half()
 
-            predictions = model(lr_images).float().clamp(0.0, 1.0).cpu()
+    print("Evaluating bicubic interpolation...")
+    with torch.inference_mode():
+        for i, (lr_images, hr_images, _) in enumerate(dataloader):
+            # Move to CPU since we're not using GPU for bicubic
+            lr_images = lr_images.cpu()
+            hr_images = hr_images.cpu()
+
+            predictions = bicubic_upsample(lr_images, config["data"]["scale"]).float().clamp(0.0, 1.0).cpu()
             targets = hr_images.float().cpu()
+
             psnr_scores.append(compute_psnr(predictions[0], targets[0]))
             ssim_scores.append(compute_ssim(predictions[0], targets[0]))
 
+            if (i + 1) % 10 == 0:
+                print(f"Processed {i + 1}/{len(dataset)} images")
+
     metrics = {
-        "experiment_name": config["experiment_name"],
+        "experiment_name": "bicubic_baseline",
         "psnr": float(np.mean(psnr_scores)),
         "ssim": float(np.mean(ssim_scores)),
         "num_images": len(dataset),
     }
 
-    output_path = Path(config["output"]["eval_metrics_path"])
+    output_path = Path("./results/bicubic_eval_metrics.json")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as file:
         json.dump(metrics, file, indent=2)
 
     print(json.dumps(metrics, indent=2))
+    print(f"Metrics saved to {output_path}")
 
 
 if __name__ == "__main__":

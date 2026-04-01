@@ -116,3 +116,5 @@ __MACOSX/
 checkpoints/
 data/
 .DS_Store
+
+inference_examples/

@@ -1,0 +1,6 @@
+{
+  "experiment_name": "unet_sr_x8_baseline",
+  "psnr": 18.743963313158517,
+  "ssim": 0.47408961445093156,
+  "num_images": 100
+}

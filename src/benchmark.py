@@ -61,15 +61,15 @@ def benchmark_model(
             elapsed_ms = (time.perf_counter() - start) * 1000.0
 
             if step >= warmup_steps:
-                predictions_cpu = predictions.float().cpu()
-                targets_cpu = hr_images.float().cpu()
-                for prediction, target in zip(predictions_cpu, targets_cpu):
-                    psnr_scores.append(compute_psnr(prediction, target))
-                    ssim_scores.append(compute_ssim(prediction, target))
+                # With batch_size=1, we can directly access the first (and only) item
+                prediction = predictions[0].float().clamp(0.0, 1.0).cpu()
+                target = hr_images[0].float().cpu()
+                psnr_scores.append(compute_psnr(prediction, target))
+                ssim_scores.append(compute_ssim(prediction, target))
 
                 latencies_ms.append(elapsed_ms)
                 measured_steps += 1
-                total_images += lr_images.shape[0]
+                total_images += 1
 
             if measured_steps >= measure_steps:
                 break
@@ -106,6 +106,7 @@ def main() -> None:
     device = resolve_device(config["benchmark"]["device"])
 
     dataset = build_dataset(
+        lr_dir=config["data"]["val_lr_dir"],
         hr_dir=config["data"]["val_hr_dir"],
         scale=config["data"]["scale"],
         crop_size=config["data"]["eval_crop_size"],
@@ -113,7 +114,7 @@ def main() -> None:
     )
     dataloader = DataLoader(
         dataset,
-        batch_size=config["data"]["batch_size"],
+        batch_size=1,  # Use batch size of 1 to avoid collation issues
         shuffle=False,
         num_workers=config["data"]["num_workers"],
         pin_memory=device.type == "cuda",
@@ -123,6 +124,7 @@ def main() -> None:
         in_channels=config["model"]["in_channels"],
         out_channels=config["model"]["out_channels"],
         base_channels=config["model"]["base_channels"],
+        scale=config["data"]["scale"],
     )
     checkpoint = torch.load(config["train"]["save_path"], map_location="cpu")
     model.load_state_dict(checkpoint["model_state_dict"])
