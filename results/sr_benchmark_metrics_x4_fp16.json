@@ -8,7 +8,7 @@
   "ssim": 0.6784108245372772,
   "measured_steps": 50,
   "total_images": 50,
-  "experiment_name": "unet_sr_x8_baseline",
+  "experiment_name": "unet_sr_x4_baseline",
   "device": "cuda",
   "use_fp16": true,
   "scale": 4
