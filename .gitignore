@@ -117,4 +117,6 @@ checkpoints/
 data/
 .DS_Store
 
+/results/
+
 *.zip
