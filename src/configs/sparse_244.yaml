@@ -1,0 +1,48 @@
+# 2:4 semi-structured sparsity experiment
+# Targets all 1×1 Conv2d (expand + project in MBResBlock)
+#
+# Usage:
+#   python scripts/run_sparse.py
+#   python scripts/run_sparse.py convert_to_sparse=true        # Ampere GPU only
+#   python scripts/run_sparse.py finetune.enabled=true finetune.epochs=5
+#   python scripts/run_sparse.py results_name=sparse_244_finetuned
+
+defaults:
+  - /dataloader: sr
+  - /datasets: sr_x4
+  - /transforms: sr
+  - _self_
+
+checkpoint_in: checkpoints/heavy_srunet_29M.pt
+checkpoint_out: checkpoints/heavy_srunet_29M_sparse244.pt
+results_dir: results
+results_name: sparse_244
+
+model:
+  _target_: src.model.heavy_model.SRUNetHeavy
+  in_channels: 3
+  out_channels: 3
+  base_channels: 96
+  expand_ratio: 4
+  se_bottleneck_ratio: 4
+  residual: true
+  num_groups: 8
+
+# Set true only on Ampere+ GPU (A100, RTX 30xx/40xx) with PyTorch >= 2.1
+convert_to_sparse: false
+
+finetune:
+  enabled: false
+  epochs: 5
+  lr: 1e-4
+  criterion:
+    _target_: src.loss.l1.L1LossWrapper
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 1e-4
+    weight_decay: 1e-5
+
+benchmark:
+  input_size: [1, 3, 256, 256]
+  n_warmup: 20
+  n_runs: 200
