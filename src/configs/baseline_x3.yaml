@@ -1,8 +1,9 @@
 # Training config for scale x3
+# Run: python train.py --config-name baseline_x3
 
 defaults:
   - dataloader: sr
-  - datasets: sr
+  - datasets: sr_x3
   - metrics: sr
   - model: unet
   - transforms: sr
@@ -13,12 +14,12 @@ experiment_name: sr_unet_x3
 seed: 42
 
 trainer:
-  device: cuda
+  device: auto
   epochs: 40
-  log_every: 5
+  log_every: 10
   val_every: 1
   grad_clip: 1.0
-  mixed_precision: false
+  mixed_precision: true
   save_dir: checkpoints
   save_name: sr_unet_x3.pt
 

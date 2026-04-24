@@ -1,4 +1,4 @@
-# Dataset paths and augmentation knobs for SR
+# Dataset config for scale x3
 scale: 3
 
 train:
