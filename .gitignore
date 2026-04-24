@@ -118,5 +118,6 @@ data/
 .DS_Store
 
 /results/
+runs/
 
 *.zip
