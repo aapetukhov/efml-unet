@@ -93,7 +93,8 @@ class BaseTrainer:
                     self.optimizer.step()
 
             batch_size = lr.size(0)
-            tracker.update("loss", loss.item(), n=batch_size)
+            for k, v in losses.items():
+                tracker.update(k, v.item() if torch.is_tensor(v) else float(v), n=batch_size)
             metric_set = "train" if training else "inference"
             for name, value in self._compute_metrics(prediction.detach(), hr, stage=metric_set).items():
                 tracker.update(name, float(value), n=batch_size)
@@ -138,6 +139,7 @@ class BaseTrainer:
                 with torch.no_grad():
                     val_metrics = self._train_val_epoch(self.val_loader, training=False, epoch=epoch)
                 self.logger.info(f"Epoch {epoch} val: {val_metrics}")
+                self.writer.log_metrics(val_metrics, step=self.global_step, prefix="val")
                 current_ssim = val_metrics.get("ssim", -1.0)
                 if current_ssim > best_ssim:
                     best_ssim = current_ssim
