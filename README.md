@@ -1,63 +1,68 @@
-# EFML Super-Resolution (Hydra Template)
+# EFML Super-Resolution
 
-Переработанная структура с Hydra-конфигами, датасетами, тренером и скриптами `train.py` / `inference.py`, адаптированная под задачу single-image super-resolution (x2) на данных из `data/sr`.
+Single-image super-resolution with a U-Net baseline, plus inference acceleration experiments.
 
-## Структура
-```
-.
-├── requirements.txt
-├── src
-│   ├── configs
-│   │   ├── baseline.yaml          # общий тренинг-конфиг (Hydра)
-│   │   ├── inference.yaml         # конфиг инференса/оценки
-│   │   ├── dataloader/sr.yaml     # батч, num_workers, pin_memory
-│   │   ├── datasets/sr.yaml       # пути train/val/test HR, scale, crop
-│   │   ├── metrics/sr.yaml        # список метрик
-│   │   ├── model/unet.yaml        # параметры U-Net
-│   │   ├── transforms/sr.yaml     # нормализация и resize опции
-│   │   └── writer/console.yaml    # логгер/трэкер
-│   ├── datasets                   # датасеты и коллейты
-│   ├── logger                     # логгирование + заглушка wandb
-│   ├── loss                       # функции потерь
-│   ├── metrics                    # SSIM + трекер
-│   ├── model                      # U-Net baseline
-│   ├── trainer                    # base_trainer / trainer / inferencer
-│   ├── transforms                 # normalize/scale helpers
-│   └── utils                      # seed/device, I/O вспомогательные утилиты
-├── train.py                       # запуск обучения через Hydra
-└── inference.py                   # запуск инференса/оценки
-```
+**Team 52** (Artem Chubov, Andrey Petukhov, Evgeny Veselkov)
 
-## Данные
-Ожидаемая структура:
-```
-data/sr/
-  train_hr/
-  val_hr/
-  test_hr/
-```
-LR генерируются на лету из HR через bicubic downsample → bicubic upscale.
+## Project goal
 
-## Запуск
-Установить зависимости:
+Train an SR U-Net and benchmark five inference optimization methods:
+1. FP32 baseline
+2. FP16 (Artem)
+3. `torch.compile` (Zhenya)
+4. TVM Relax/TIR (Zhenya + Andrey)
+5. Quantization INT8 (Artem + Zhenya)
+6. Pruning / 2:4 sparsity (Andrey)
+
+## Setup
+
 ```bash
 pip install -r requirements.txt
+bash scripts/download_data.sh   # ~3.7 GB, skippable if data/raw/ already populated
+bash scripts/prepare_data.sh    # creates train/val/test symlinks in data/sr/
 ```
 
-Обучение (использует `src/configs/baseline.yaml`):
+## Training
+
 ```bash
-python train.py trainer.device=auto datasets.scale=2
+# x4 (default)
+python train.py
+
+# other scales
+python train.py --config-name baseline_x3
+python train.py --config-name baseline_x8
+
+# override any param
+python train.py trainer.epochs=10 trainer.device=cpu
 ```
 
-Инференс/оценка (берёт чекпоинт из `checkpoints/sr_unet_x2.pt` по умолчанию):
-```bash
-python inference.py checkpoint_path=checkpoints/sr_unet_x2.pt save_predictions=true
-```
-Hydra позволяет переопределять любые параметры, например `dataloader.batch_size=4` или `datasets.train.crop_size=128` без копипаста конфигов.
+Default config: [src/configs/baseline.yaml](src/configs/baseline.yaml) — scale x4, AMP on, 50 epochs, DIV2K 800 train / 50 val images.
 
-## Ключевые отличия от старой версии
-- Шаблонная директория и конфигурации в стиле ASR-DeepSpeech2, без дублирования настроек между экспериментами.
-- Один базовый Trainer + Inferencer с поддержкой mixed precision, grad clipping и простого логгинга.
-- Метрика SSIM вынесена в отдельный пакет и задаётся через конфиги.
-- Датасет генерирует LR/HR пары на лету, есть отдельные конфиги для датасетов и даталоадеров.
-- Writer по умолчанию console; можно переключить на wandb через `writer.name=wandb` (при установленном `wandb`).
+## Data
+
+**Dataset:** [DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/) — 2K resolution HR images.
+
+| Split | Source | Count |
+|---|---|---|
+| train | DIV2K_train_HR (0001–0800) | 800 |
+| val   | DIV2K_valid_HR (0801–0850) | 50  |
+| test  | DIV2K_valid_HR (0851–0900) | 50  |
+
+LR images are generated on-the-fly: HR crop → bicubic downsample → bicubic upsample to HR size.
+This matches the model's same-size I/O (standard U-Net, no internal upsampling).
+
+## Repository structure
+
+```
+src/
+  configs/          Hydra configs (one top-level .yaml per scale)
+  datasets/         Dataset classes + collate
+  model/            SRUNet architecture
+  trainer/          Trainer + Inferencer
+  loss/ metrics/ transforms/ logger/ utils/ writer/
+scripts/
+  download_data.sh  wget DIV2K train + valid HR
+  prepare_data.sh   create train/val/test symlinks
+train.py            entry point (Hydra)
+inference.py        eval / inference entry point
+```
