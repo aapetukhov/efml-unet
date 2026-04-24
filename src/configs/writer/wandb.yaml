@@ -1,0 +1,8 @@
+# Weights & Biases writer
+# Usage: python train.py writer=wandb
+# Auth:  wandb login            (interactive, saves token to ~/.netrc)
+#   or:  WANDB_API_KEY=<token> python train.py writer=wandb
+name: wandb
+project: efml
+entity: null          # your wandb username or team; null = personal account
+run_name: ${experiment_name}

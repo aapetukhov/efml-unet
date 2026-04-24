@@ -20,7 +20,9 @@ trainer:
   grad_clip: 1.0
   mixed_precision: true
   save_dir: checkpoints
-  save_name: sr_unet_x8_residual.pt
+  save_name: sr_unet_x8.pt
+  image_log_every: 100
+  image_log_samples: 4
 
 optimization:
   lr: 1e-3
