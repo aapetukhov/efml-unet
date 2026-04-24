@@ -15,23 +15,26 @@ experiment_name: sr_unet_x4
 seed: 42
 
 trainer:
-  device: auto          # 'auto' | 'cpu' | 'cuda:0'
+  device: auto # 'auto' | 'cpu' | 'cuda:0'
   epochs: 50
   log_every: 10
   val_every: 1
   grad_clip: 1.0
   mixed_precision: true
   save_dir: checkpoints
-  save_name: sr_unet_x4.pt
+  save_name: srunet_x4.pt
   image_log_every: 100  # log LR/SR/HR grid every N train steps (0 = disabled)
   image_log_samples: 4  # number of samples per grid
 
 optimization:
-  lr: 1e-3
-  weight_decay: 1e-6
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 1e-3
+    weight_decay: 1e-6
   scheduler:
-    name: cosine
-    T_max: null  # defaults to epochs
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: ${trainer.epochs}
+    eta_min: 0
 
 criterion:
-  name: l1
+  _target_: src.loss.l1.L1LossWrapper

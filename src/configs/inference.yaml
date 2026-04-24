@@ -1,20 +1,18 @@
-# Inference/eval config
+# Inference / evaluation config
+# Run: python inference.py checkpoint_path=checkpoints/sr_unet_x4.pt
 
 defaults:
   - dataloader: sr
-  - datasets: sr
+  - datasets: sr_x4
   - metrics: sr
   - model: unet
   - transforms: sr
-  - writer: console
   - _self_
 
 seed: 42
-experiment_name: sr_unet_x2
+experiment_name: sr_unet_x4
 
 device: auto
-checkpoint_path: checkpoints/sr_unet_x2.pt
-batch_size: 1
-num_workers: 2
-save_predictions: true
+checkpoint_path: checkpoints/sr_unet_x4.pt
+save_predictions: false
 predictions_dir: results/preds

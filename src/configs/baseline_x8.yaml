@@ -25,11 +25,14 @@ trainer:
   image_log_samples: 4
 
 optimization:
-  lr: 1e-3
-  weight_decay: 1e-6
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 1e-3
+    weight_decay: 1e-6
   scheduler:
-    name: cosine
-    T_max: null
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: ${trainer.epochs}
+    eta_min: 0
 
 criterion:
-  name: l1
+  _target_: src.loss.l1.L1LossWrapper

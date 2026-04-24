@@ -1,8 +1,7 @@
-# Metrics to compute during train/validation and inference
+# Metrics to compute during training and inference
+# Add more metrics by appending _target_ entries
 train:
-  - name: ssim
-    reduce: mean
+  - _target_: src.metrics.ssim.SSIMMetric
 
 inference:
-  - name: ssim
-    reduce: mean
+  - _target_: src.metrics.ssim.SSIMMetric
