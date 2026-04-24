@@ -44,6 +44,8 @@ class BaseTrainer:
         self.scaler = GradScaler(device="cuda", enabled=config.trainer.mixed_precision and device.startswith("cuda"))
         self.global_step = 0
         self.checkpoint_path = prepare_checkpoint_path(config)
+        self.image_log_every = getattr(config.trainer, "image_log_every", 0)
+        self.image_log_samples = getattr(config.trainer, "image_log_samples", 4)
 
     def _move_batch(self, batch: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         return {k: (v.to(self.device, non_blocking=True) if torch.is_tensor(v) else v) for k, v in batch.items()}
@@ -64,7 +66,7 @@ class BaseTrainer:
         self.model.train(training)
 
         progress = tqdm(dataloader, desc=f"{mode} {epoch}", leave=False)
-        for batch in progress:
+        for batch_idx, batch in enumerate(progress):
             self.global_step += 1 if training else 0
             batch = self._move_batch(batch)
             lr = batch["lr"]
@@ -98,6 +100,18 @@ class BaseTrainer:
 
             if training and self.global_step % self.config.trainer.log_every == 0:
                 self.writer.log_metrics(tracker.to_dict(), step=self.global_step, prefix=mode)
+
+            log_train_imgs = training and self.image_log_every > 0 and self.global_step % self.image_log_every == 0
+            log_val_imgs = not training and batch_idx == 0
+            if log_train_imgs or log_val_imgs:
+                self.writer.add_images(
+                    f"{mode}/lr_sr_hr",
+                    lr.detach().cpu(),
+                    prediction.detach().cpu(),
+                    hr.detach().cpu(),
+                    step=self.global_step,
+                    max_samples=self.image_log_samples,
+                )
 
         return tracker.to_dict()
 
