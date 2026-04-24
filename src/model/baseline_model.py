@@ -6,8 +6,6 @@ import torch.nn.functional as F
 
 
 class DoubleConv(nn.Module):
-    """(convolution => [BN] => ReLU) * 2"""
-
     def __init__(self, in_channels, out_channels, mid_channels=None):
         super().__init__()
         if not mid_channels:
@@ -26,8 +24,6 @@ class DoubleConv(nn.Module):
 
 
 class Down(nn.Module):
-    """Downscaling with maxpool then double conv"""
-
     def __init__(self, in_channels, out_channels):
         super().__init__()
         self.maxpool_conv = nn.Sequential(nn.MaxPool2d(2), DoubleConv(in_channels, out_channels))
@@ -37,11 +33,8 @@ class Down(nn.Module):
 
 
 class Up(nn.Module):
-    """Upscaling then double conv"""
-
     def __init__(self, in_channels, out_channels, bilinear=True):
         super().__init__()
-
         if bilinear:
             self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
             self.conv = DoubleConv(in_channels, out_channels, in_channels // 2)
@@ -51,21 +44,10 @@ class Up(nn.Module):
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
-        diffY = x2.size()[2] - x1.size()[2]
-        diffX = x2.size()[3] - x1.size()[3]
-
-        x1 = F.pad(
-            x1,
-            [
-                diffX // 2,
-                diffX - diffX // 2,
-                diffY // 2,
-                diffY - diffY // 2,
-            ],
-        )
-
-        x = torch.cat([x2, x1], dim=1)
-        return self.conv(x)
+        diff_y = x2.size(2) - x1.size(2)
+        diff_x = x2.size(3) - x1.size(3)
+        x1 = F.pad(x1, [diff_x // 2, diff_x - diff_x // 2, diff_y // 2, diff_y - diff_y // 2])
+        return self.conv(torch.cat([x2, x1], dim=1))
 
 
 class OutConv(nn.Module):
@@ -78,50 +60,34 @@ class OutConv(nn.Module):
 
 
 class SRUNet(nn.Module):
-    def __init__(self, n_channels=3, n_classes=3, base_channels=64, bilinear=True, residual=True):
+    def __init__(self, in_channels=3, out_channels=3, base_channels=64, bilinear=True, residual=True):
         super().__init__()
-        self.n_channels = n_channels
-        self.n_classes = n_classes
-        self.bilinear = bilinear
-        self.residual = residual and n_channels == n_classes
+        self.residual = residual and in_channels == out_channels
         bc = base_channels
-
-        self.inc = DoubleConv(n_channels, bc)
-        self.down1 = Down(bc, bc * 2)
-        self.down2 = Down(bc * 2, bc * 4)
-        self.down3 = Down(bc * 4, bc * 8)
         factor = 2 if bilinear else 1
-        self.down4 = Down(bc * 8, bc * 16 // factor)
-        self.up1 = Up(bc * 16, bc * 8 // factor, bilinear)
-        self.up2 = Up(bc * 8, bc * 4 // factor, bilinear)
-        self.up3 = Up(bc * 4, bc * 2 // factor, bilinear)
-        self.up4 = Up(bc * 2, bc, bilinear)
-        self.outc = OutConv(bc, n_classes)
+
+        self.inc   = DoubleConv(in_channels, bc)
+        self.down1 = Down(bc,      bc * 2)
+        self.down2 = Down(bc * 2,  bc * 4)
+        self.down3 = Down(bc * 4,  bc * 8)
+        self.down4 = Down(bc * 8,  bc * 16 // factor)
+        self.up1   = Up(bc * 16,   bc * 8  // factor, bilinear)
+        self.up2   = Up(bc * 8,    bc * 4  // factor, bilinear)
+        self.up3   = Up(bc * 4,    bc * 2  // factor, bilinear)
+        self.up4   = Up(bc * 2,    bc,                bilinear)
+        self.outc  = OutConv(bc, out_channels)
 
     def forward(self, x):
-        x_in = x
-        x1 = self.inc(x_in)
+        x1 = self.inc(x)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
         x4 = self.down3(x3)
         x5 = self.down4(x4)
-        x = self.up1(x5, x4)
-        x = self.up2(x, x3)
-        x = self.up3(x, x2)
-        x = self.up4(x, x1)
-        logits = self.outc(x)
+        out = self.up1(x5, x4)
+        out = self.up2(out, x3)
+        out = self.up3(out, x2)
+        out = self.up4(out, x1)
+        out = self.outc(out)
         if self.residual:
-            # Global skip preserves low-frequency/color information
-            logits = logits + x_in
-        # keep logits unclamped; downstream code can clamp/denormalize as needed
-        return logits
-
-
-def build_model(config):
-    return SRUNet(
-        n_channels=config.model.in_channels,
-        n_classes=config.model.out_channels,
-        base_channels=config.model.base_channels,
-        bilinear=getattr(config.model, "bilinear", True),
-        residual=getattr(config.model, "residual", True),
-    )
+            out = out + x
+        return out
