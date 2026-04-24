@@ -1,0 +1,72 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[russian]{babel}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{siunitx}
+
+\title{Промежуточный отчёт: ускорение инференса Super-Resolution U-Net}
+\author{Команда 52: Артём Чубов, Андрей Петухов, Евгений Веселков}
+\date{1 апреля 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Введение}
+Цель проекта состоит в обучении и последующем ускорении инференса U-Net-подобной модели. В качестве задачи, которую должна решать наша модель, мы выбрали single-image super-resolution, мы сравниваем несколько вариантов инференса на одной и той же архитектуре и одном и том же наборе данных. В работе оцениваются как метрики качества восстановления изображения, так и вычислительные характеристики. Основное внимание уделяется метрикам \href{https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio}{PSNR} (Peak signal to noise ratio) и \href{https://en.wikipedia.org/wiki/Structural_similarity_index_measure}{SSIM} (Structural similarity index measure) с точки зрения качества, а с точки зрения инференса - latency и пропускная способность.
+
+\section{Постановка задачи}
+В проекте рассматривается задача single-image super-resolution. В качестве базовой модели используется лёгкая U-Net-подобная encoder-decoder архитектура со skip-connection-ами. Эксперименты проводятся на датасете DIV2K, разделённом на обучающую, валидационную и тестовую выборки. К настоящему моменту мы успели поэкспериментировать с коэффициентами масштабирования $\times 4$ и $\times 8$. Вход в нейросеть формируется из изображения в высоком разрешении через bicubic downsampling, после чего он bicubic upsample-ится обратно до исходного размера и в таком виде подаётся в модель. Качество реконструкции оценивается с помощью PSNR и SSIM. Эксперименты организованы в виде единого репозитория проекта на \href{https://github.com/aapetukhov/efml-unet}{GitHub}.
+
+\section{Ход первого этапа}
+На первом этапе была подготовлена схема работы с данными, реализован и обучен бейзлайн, после чего проведена первичная оценка качества на валидации. Следующим шагом стали замеры производительности инференса на GPU в режимах FP32 и FP16. На данный момент сравнения FP32 и FP16 проведены для модели $\times 4$. Для масштаба $\times 8$ получены первые результаты по качеству на валидации.
+
+\section{Текущие результаты}
+
+Промежуточные результаты первого эксперимента для модели U-Net SR со scale factor $\times 4$ приведены в таблице~\ref{tab:fp32_fp16_comparison}.
+
+\begin{table}[h!]
+\centering
+\caption{Сравнение FP32 и FP16 инференса для U-Net SR $\times 4$}
+\begin{tabular}{lcccccc}
+\toprule
+Пайплайн & Latency, ms & P50, ms & P95, ms & Throughput, img/s & PSNR & SSIM \\
+\midrule
+FP32 & 5.71 & 5.35 & 6.70 & 175.2 & 23.86 & 0.678 \\
+FP16 & \textbf{5.15} & \textbf{5.02} & \textbf{6.23} & \textbf{194.2} & 23.86 & 0.678 \\
+\bottomrule
+\end{tabular}
+\label{tab:fp32_fp16_comparison}
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[height=5cm]{pics/0802_lr.jpeg}
+        \caption{Входное изображение в низком разрешении}
+    \end{subfigure}\hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[height=5cm]{pics/0802_prediction.png}
+        \caption{Предсказание модели, разрешение $\times 8$}
+    \end{subfigure}
+    \caption{Визуальный пример работы бейзлайн-модели}
+    \label{fig:sr_example}
+\end{figure}
+
+На рисунке~\ref{fig:sr_example} приведён пример работы модели для масштаба $\times 8$. Слева показан входной кадр, а справа - предсказание модели.
+
+\section{Дальнейший план}
+Следующий этап проекта связан с расширением числа сравниваемых режимов инференса. После фиксации бейзлайна в FP16 планируется исследовать ускорение с использованием \texttt{torch.compile} и сравнить несколько режимов компиляции. Затем предполагается перейти к альтернативным компиляторным стекам, в частности TVM или близким решениям, чтобы проверить, можно ли получить дополнительный выигрыш за счёт autotuning и более агрессивной оптимизации вычислительного графа.
+
+Отдельное направление связано с исследованием квантизации, прунинга и спарсности. Здесь интересно, конечно, насколько сильно такие преобразования повлияют не только на скорость, но и на итоговое качество.
+
+
+\end{document}
