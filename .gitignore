@@ -119,5 +119,6 @@ data/
 
 /results/
 runs/
+media/
 
 *.zip
