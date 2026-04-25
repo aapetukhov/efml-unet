@@ -11,6 +11,10 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+from PIL import Image
+
+from PIL import Image
+
 from src.config import load_config
 from src.data import build_dataset
 from src.metrics import compute_psnr, compute_ssim
@@ -60,16 +64,18 @@ def benchmark_model(
                 torch.cuda.synchronize()
             elapsed_ms = (time.perf_counter() - start) * 1000.0
 
+            batch_size = lr_images.size(0)
+
             if step >= warmup_steps:
-                # With batch_size=1, we can directly access the first (and only) item
-                prediction = predictions[0].float().clamp(0.0, 1.0).cpu()
-                target = hr_images[0].float().cpu()
-                psnr_scores.append(compute_psnr(prediction, target))
-                ssim_scores.append(compute_ssim(prediction, target))
+                for i in range(batch_size):
+                    prediction = predictions[i].float().clamp(0.0, 1.0).cpu()
+                    target = hr_images[i].float().cpu()
+                    psnr_scores.append(compute_psnr(prediction, target))
+                    ssim_scores.append(compute_ssim(prediction, target))
 
                 latencies_ms.append(elapsed_ms)
                 measured_steps += 1
-                total_images += 1
+                total_images += batch_size
 
             if measured_steps >= measure_steps:
                 break
@@ -99,26 +105,55 @@ def benchmark_model(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True)
+    parser.add_argument(
+        "--batch-sizes",
+        type=int,
+        nargs="+",
+        default=None,
+        help="Batch sizes to sweep. Overrides config batch_size.",
+    )
+    parser.add_argument(
+        "--compile",
+        choices=["default", "reduce-overhead", "max-autotune"],
+        default=None,
+        help="Enable torch.compile with the given mode.",
+    )
+    parser.add_argument(
+        "--warmup-steps",
+        type=int,
+        default=None,
+        help="Override warmup_steps from config.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
     set_seed(config["seed"])
     device = resolve_device(config["benchmark"]["device"])
+    device_name = (
+        torch.cuda.get_device_name(device)
+        if device.type == "cuda"
+        else "cpu"
+    )
+    use_fp16 = bool(config["benchmark"]["use_fp16"])
 
+    crop_size = config["data"]["eval_crop_size"]
     dataset = build_dataset(
         lr_dir=config["data"]["val_lr_dir"],
         hr_dir=config["data"]["val_hr_dir"],
         scale=config["data"]["scale"],
-        crop_size=config["data"]["eval_crop_size"],
+        crop_size=crop_size,
         training=False,
     )
-    dataloader = DataLoader(
-        dataset,
-        batch_size=1,  # Use batch size of 1 to avoid collation issues
-        shuffle=False,
-        num_workers=config["data"]["num_workers"],
-        pin_memory=device.type == "cuda",
-    )
+    # Drop images whose LR shorter side is smaller than crop_size — they
+    # would produce differently-sized tensors that break batched collation.
+    before = len(dataset)
+    dataset.samples = [
+        (lr, hr, name)
+        for lr, hr, name in dataset.samples
+        if min(Image.open(lr).size) >= crop_size
+    ]
+    if len(dataset) < before:
+        print(f"Filtered {before - len(dataset)}/{before} images (LR shorter side < {crop_size}px).")
 
     model = build_model(
         in_channels=config["model"]["in_channels"],
@@ -128,35 +163,74 @@ def main() -> None:
     )
     checkpoint = torch.load(config["train"]["save_path"], map_location="cpu")
     model.load_state_dict(checkpoint["model_state_dict"])
-    model = prepare_model_for_inference(
-        model=model,
-        device=device,
-        use_fp16=config["benchmark"]["use_fp16"],
-    )
+    model = prepare_model_for_inference(model=model, device=device, use_fp16=use_fp16)
 
-    metrics = benchmark_model(
-        model=model,
-        dataloader=dataloader,
-        device=device,
-        warmup_steps=config["benchmark"]["warmup_steps"],
-        measure_steps=config["benchmark"]["measure_steps"],
-        use_fp16=config["benchmark"]["use_fp16"],
-    )
-    metrics.update(
-        {
-            "experiment_name": config["experiment_name"],
-            "device": str(device),
-            "use_fp16": bool(config["benchmark"]["use_fp16"]),
-            "scale": config["data"]["scale"],
-        }
-    )
+    if args.compile is not None:
+        print(f"Compiling model with mode='{args.compile}' (first warmup step will be slow)...")
+        model = torch.compile(model, mode=args.compile)
+
+    warmup_steps = args.warmup_steps if args.warmup_steps is not None else config["benchmark"]["warmup_steps"]
+    batch_sizes = args.batch_sizes or [config["benchmark"].get("batch_size", 1)]
+    all_results = []
+
+    for bs in batch_sizes:
+        dataloader = DataLoader(
+            dataset,
+            batch_size=bs,
+            shuffle=False,
+            num_workers=config["data"]["num_workers"],
+            pin_memory=device.type == "cuda",
+        )
+        try:
+            metrics = benchmark_model(
+                model=model,
+                dataloader=dataloader,
+                device=device,
+                warmup_steps=warmup_steps,
+                measure_steps=config["benchmark"]["measure_steps"],
+                use_fp16=use_fp16,
+            )
+        except torch.cuda.OutOfMemoryError:
+            torch.cuda.empty_cache()
+            print(f"\n--- batch_size={bs} --- OOM, skipping")
+            continue
+        metrics.update(
+            {
+                "experiment_name": config["experiment_name"],
+                "device": str(device),
+                "device_name": device_name,
+                "use_fp16": use_fp16,
+                "compile_mode": args.compile,
+                "scale": config["data"]["scale"],
+                "batch_size": bs,
+            }
+        )
+        all_results.append(metrics)
+        print(f"\n--- batch_size={bs} ---")
+        print(json.dumps(metrics, indent=2))
 
     output_path = Path(config["output"]["benchmark_metrics_path"])
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as file:
-        json.dump(metrics, file, indent=2)
 
-    print(json.dumps(metrics, indent=2))
+    if len(all_results) == 1:
+        result_to_save = all_results[0]
+    else:
+        result_to_save = all_results
+        # Print summary table
+        print("\n\n=== Batch Size Sweep Summary ===")
+        print(f"{'BS':>4}  {'lat_mean':>10}  {'lat_p95':>9}  {'throughput':>14}  {'PSNR':>7}  {'SSIM':>6}")
+        for r in all_results:
+            print(
+                f"{r['batch_size']:>4}  "
+                f"{r['latency_mean_ms']:>9.1f}ms  "
+                f"{r['latency_p95_ms']:>8.1f}ms  "
+                f"{r['throughput_images_per_s']:>12.1f}/s  "
+                f"{r['psnr']:>7.3f}  "
+                f"{r['ssim']:>6.4f}"
+            )
+
+    with output_path.open("w", encoding="utf-8") as file:
+        json.dump(result_to_save, file, indent=2)
 
 
 if __name__ == "__main__":

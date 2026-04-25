@@ -1,0 +1,42 @@
+[
+  {
+    "label": "eager (FP32)",
+    "latency_mean_ms": 135.21785494009237,
+    "latency_std_ms": 4.526555114940562,
+    "latency_p50_ms": 133.95170400053757,
+    "latency_p95_ms": 143.686020199857,
+    "throughput_img_s": 7.3954730345563116,
+    "psnr": 23.49709642130205,
+    "ssim": 0.6918364888429642
+  },
+  {
+    "label": "ORT CUDA EP",
+    "latency_mean_ms": 130.44879680008307,
+    "latency_std_ms": 6.82584179084274,
+    "latency_p50_ms": 129.6533394988728,
+    "latency_p95_ms": 142.79926530007288,
+    "throughput_img_s": 7.665843032132614,
+    "psnr": 23.497096491129096,
+    "ssim": 0.6918364894390107
+  },
+  {
+    "label": "ORT Tensorrt EP",
+    "latency_mean_ms": 96.66345613994054,
+    "latency_std_ms": 1.400438637368426,
+    "latency_p50_ms": 96.31860850004159,
+    "latency_p95_ms": 99.82816450019527,
+    "throughput_img_s": 10.345171173605578,
+    "psnr": 23.4970785596263,
+    "ssim": 0.6918359386920929
+  },
+  {
+    "label": "ORT Tensorrt EP",
+    "latency_mean_ms": 33.6457665999842,
+    "latency_std_ms": 0.7326285824073451,
+    "latency_p50_ms": 33.76324350028881,
+    "latency_p95_ms": 34.75590519947218,
+    "throughput_img_s": 29.72142117874852,
+    "psnr": 23.49735371717973,
+    "ssim": 0.691827192902565
+  }
+]
