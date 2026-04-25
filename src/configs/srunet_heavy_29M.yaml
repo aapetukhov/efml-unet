@@ -1,0 +1,89 @@
+dataloader:
+  batch_size: 8
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+  persistent_workers: true
+datasets:
+  scale: 4
+  train:
+    hr_dir: data/sr/train_hr
+    crop_size: 192
+    random_crop: true
+  val:
+    hr_dir: data/sr/val_hr
+    crop_size: 192
+    random_crop: false
+  test:
+    hr_dir: data/sr/test_hr
+    crop_size: null
+    random_crop: false
+metrics:
+  train:
+  - _target_: src.metrics.ssim.SSIMMetric
+  inference:
+  - _target_: src.metrics.ssim.SSIMMetric
+model:
+  _target_: src.model.heavy_model.SRUNetHeavy
+  in_channels: 3
+  out_channels: 3
+  base_channels: 96
+  expand_ratio: 4
+  se_bottleneck_ratio: 4
+  residual: true
+  num_groups: 8
+transforms:
+  normalize: false
+  mean:
+  - 0.5
+  - 0.5
+  - 0.5
+  std:
+  - 0.5
+  - 0.5
+  - 0.5
+  resize_before_crop: null
+  hflip_prob: 0.5
+  vflip_prob: 0.25
+  rotate90_prob: 0.5
+  transpose_prob: 0.3
+  color_jitter_prob: 0.0
+  color_jitter:
+    brightness: 0.0
+    contrast: 0.0
+    saturation: 0.0
+    hue: 0.0
+  gaussian_noise_prob: 0.0
+  gaussian_noise_std: 0.0
+  cutout_prob: 0.4
+  cutout_min_ratio: 0.02
+  cutout_max_ratio: 0.08
+writer:
+  name: console
+  project: efml
+  entity: null
+  run_name: ${experiment_name}
+experiment_name: heavy_unet_29M
+seed: 42
+trainer:
+  device: auto
+  epochs: 50
+  log_every: 10
+  val_every: 1
+  grad_clip: 1.0
+  mixed_precision: true
+  save_dir: checkpoints
+  save_name: heavy_srunet_29M.pt
+  image_log_every: 100
+  image_log_samples: 4
+optimization:
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 0.001
+    weight_decay: 1.0e-06
+  scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: ${trainer.epochs}
+    eta_min: 0
+criterion:
+  _target_: src.loss.l1.L1LossWrapper
