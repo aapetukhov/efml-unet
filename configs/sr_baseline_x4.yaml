@@ -1,0 +1,26 @@
+experiment_name: unet_sr_x4_baseline
+seed: 42
+
+data:
+  val_hr_dir: ./data/div2k/DIV2K_valid_HR
+  val_lr_dir: ./data/div2k/DIV2K_valid_LR_bicubic/X4
+  scale: 4
+  eval_crop_size: 256
+  num_workers: 4
+
+model:
+  in_channels: 3
+  out_channels: 3
+  base_channels: 64
+
+train:
+  save_path: /home/kikjeck/ysda/efml/unet_sr_x4_baseline.pt
+
+benchmark:
+  warmup_steps: 10
+  measure_steps: 50
+  use_fp16: false
+  device: auto
+
+output:
+  benchmark_metrics_path: ./results/sr_benchmark_metrics_x4.json
