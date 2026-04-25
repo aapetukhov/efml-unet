@@ -60,6 +60,10 @@ def main(cfg: DictConfig) -> None:
     model.load_state_dict(ckpt["model_state_dict"])
     log.info(f"Loaded: {ckpt_path}")
 
+    if cfg.get("fp16", False):
+        model.half()
+        log.info("Model cast to FP16")
+
     dataloaders, _ = get_dataloaders(cfg, device)
     val_loader = dataloaders.get("val") or dataloaders.get("test")
 
@@ -106,6 +110,7 @@ def main(cfg: DictConfig) -> None:
         "ssim_drop": round(baseline_ssim - result_ssim, 4),
         "sparsity":  round(sparsity, 4),
         "convert_to_sparse": cfg.get("convert_to_sparse", False),
+        "fp16": cfg.get("fp16", False),
         "finetuned": cfg.finetune.enabled,
         "finetune_epochs": cfg.finetune.epochs if cfg.finetune.enabled else 0,
         "pruned_layers": pruned_layers,

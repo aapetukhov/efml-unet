@@ -1,5 +1,5 @@
 # 2:4 semi-structured sparsity experiment
-# Targets all 1×1 Conv2d (expand + project in MBResBlock)
+# Targets all 1x1 Conv2d (expand + project in MBResBlock)
 #
 # Usage:
 #   python scripts/run_sparse.py
@@ -31,6 +31,10 @@ model:
 # Set true only on Ampere+ GPU (A100, RTX 30xx/40xx) with PyTorch >= 2.1
 convert_to_sparse: false
 
+# Cast model to FP16 before benchmarking — required for cuSPARSELt speedup.
+# Makes baseline FP16 too, so the comparison is fair (FP16 dense vs FP16 sparse).
+fp16: false
+
 finetune:
   enabled: false
   epochs: 5
@@ -43,6 +47,6 @@ finetune:
     weight_decay: 1e-5
 
 benchmark:
-  input_size: [1, 3, 256, 256]
+  input_size: [ 1, 3, 256, 256 ]
   n_warmup: 20
   n_runs: 200

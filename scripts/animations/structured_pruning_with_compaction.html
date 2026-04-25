@@ -8,21 +8,73 @@
     box-sizing: border-box;
     font-family: var(--font-sans);
   }
-  .pw-header { margin-bottom: 10px; }
-  .pw-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
-  .pw-config { font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono); }
-  .pw-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-  .pw-controls label { font-size: 13px; color: var(--color-text-secondary); font-family: var(--font-mono); min-width: 90px; }
-  .pw-controls input[type="range"] { flex: 1; }
-  .pw-val { font-size: 13px; font-weight: 500; color: var(--color-text-primary); font-family: var(--font-mono); min-width: 48px; text-align: right; }
-  .pw-record-btn {
-    padding: 4px 14px; font-size: 13px; font-family: var(--font-mono);
-    border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md);
-    background: var(--color-background-primary); color: var(--color-text-primary);
-    cursor: pointer; white-space: nowrap;
+
+  .pw-header {
+    margin-bottom: 10px;
   }
-  .pw-record-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .pw-record-btn.recording { color: #e85d5d; border-color: #e85d5d; }
+
+  .pw-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+  }
+
+  .pw-config {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+  }
+
+  .pw-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .pw-controls label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    min-width: 90px;
+  }
+
+  .pw-controls input[type="range"] {
+    flex: 1;
+  }
+
+  .pw-val {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    min-width: 48px;
+    text-align: right;
+  }
+
+  .pw-record-btn {
+    padding: 4px 14px;
+    font-size: 13px;
+    font-family: var(--font-mono);
+    border: 1px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .pw-record-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pw-record-btn.recording {
+    color: #e85d5d;
+    border-color: #e85d5d;
+  }
+
   .pw-canvas {
     position: relative;
     width: 100%;
@@ -32,8 +84,17 @@
     background: var(--color-background-primary);
     cursor: grab;
   }
-  .pw-canvas.grabbing { cursor: grabbing; }
-  .pw-canvas canvas { display: block; width: 100%; height: 100%; }
+
+  .pw-canvas.grabbing {
+    cursor: grabbing;
+  }
+
+  .pw-canvas canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
   .pw-hint {
     position: absolute;
     bottom: 8px;
@@ -42,6 +103,7 @@
     color: var(--color-text-tertiary);
     pointer-events: none;
   }
+
   .pw-legend {
     position: absolute;
     top: 8px;
@@ -54,17 +116,47 @@
     font-family: var(--font-mono);
     pointer-events: none;
   }
-  .pw-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-  .pw-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+
+  .pw-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .pw-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+
   .pw-metric {
     background: var(--color-background-primary);
     border-radius: var(--border-radius-md);
     padding: 8px 12px;
     border: 0.5px solid var(--color-border-tertiary);
   }
-  .pw-metric-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; font-family: var(--font-mono); }
-  .pw-metric-val { font-size: 16px; font-weight: 500; color: var(--color-text-primary); font-family: var(--font-mono); }
-  .pw-metric-val.pw-good { color: var(--color-text-success); }
+
+  .pw-metric-label {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-bottom: 2px;
+    font-family: var(--font-mono);
+  }
+
+  .pw-metric-val {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+  }
+
+  .pw-metric-val.pw-good {
+    color: var(--color-text-success);
+  }
 </style>
 
 <h2 class="sr-only">Интерактивная визуализация прунинга MBResBlock с подсветкой удаляемых каналов</h2>
@@ -72,7 +164,7 @@
 <div class="pw-wrap">
   <div class="pw-header">
     <div class="pw-title">Структурированный прунинг MBResBlock — highlight → fade → compact</div>
-    <div class="pw-config">in_ch=4 · mid_ch=24 · out_ch=4 · num_groups=4 (4×6 каналов · оттенок = группа)</div>
+    <div class="pw-config">in_ch=4 · mid_ch=24 · out_ch=4 · num_groups=4 (4x6 каналов · оттенок = группа)</div>
   </div>
   <div class="pw-controls">
     <label>prune_ratio</label>
@@ -82,9 +174,9 @@
   </div>
   <div class="pw-canvas" id="pw-canvas">
     <div class="pw-legend">
-      <span><span class="pw-dot" style="background:#E85D5D"></span>expand 1×1</span>
-      <span><span class="pw-dot" style="background:#4FB6A8"></span>DW 3×3</span>
-      <span><span class="pw-dot" style="background:#9B86E0"></span>project 1×1</span>
+      <span><span class="pw-dot" style="background:#E85D5D"></span>expand 1x1</span>
+      <span><span class="pw-dot" style="background:#4FB6A8"></span>DW 3x3</span>
+      <span><span class="pw-dot" style="background:#9B86E0"></span>project 1x1</span>
       <span><span class="pw-dot" style="background:#a0a0a0"></span>‖W‖₁ score</span>
     </div>
     <div class="pw-hint">потяни мышью · колесо для зума · 4 оттенка = num_groups</div>
@@ -111,525 +203,525 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-(function() {
-  const MID_CH = 24, IN_CH = 4, OUT_CH = 4, NUM_GROUPS = 4, K = 3;
-  const GROUP_SIZE = MID_CH / NUM_GROUPS;
-  const GROUP_TINTS = [-0.40, -0.13, 0.13, 0.40];
+  (function () {
+    const MID_CH = 24, IN_CH = 4, OUT_CH = 4, NUM_GROUPS = 4, K = 3;
+    const GROUP_SIZE = MID_CH / NUM_GROUPS;
+    const GROUP_TINTS = [-0.40, -0.13, 0.13, 0.40];
 
-  // Animation rates (lower = slower / smoother)
-  const VIS_LERP     = 0.06;   // channel visibility / opacity
-  const COMPACT_LERP = 0.045;  // overall compaction amount
-  const POS_LERP     = 0.10;   // per-channel z-position smoothing
+    // Animation rates (lower = slower / smoother)
+    const VIS_LERP = 0.06;   // channel visibility / opacity
+    const COMPACT_LERP = 0.045;  // overall compaction amount
+    const POS_LERP = 0.10;   // per-channel z-position smoothing
 
-  // Highlight phase (channel pulses before fading out)
-  const HIGHLIGHT_DURATION_MS = 650;
-  const HIGHLIGHT_PEAK   = 0.72;  // emissive intensity at peak
-  const HIGHLIGHT_BAR    = 0.85;  // emissive intensity for the importance bar
-  const HIGHLIGHT_SCALE  = 0.12;  // up to 12% scale pulse
+    // Highlight phase (channel pulses before fading out)
+    const HIGHLIGHT_DURATION_MS = 650;
+    const HIGHLIGHT_PEAK = 0.72;  // emissive intensity at peak
+    const HIGHLIGHT_BAR = 0.85;  // emissive intensity for the importance bar
+    const HIGHLIGHT_SCALE = 0.12;  // up to 12% scale pulse
 
-  function tintColor(hex, t) {
-    let r = (hex >> 16) & 0xff;
-    let g = (hex >> 8) & 0xff;
-    let b = hex & 0xff;
-    if (t > 0) {
-      r = r + (255 - r) * t;
-      g = g + (255 - g) * t;
-      b = b + (255 - b) * t;
-    } else if (t < 0) {
-      const f = 1 + t;
-      r *= f; g *= f; b *= f;
+    function tintColor(hex, t) {
+      let r = (hex >> 16) & 0xff;
+      let g = (hex >> 8) & 0xff;
+      let b = hex & 0xff;
+      if (t > 0) {
+        r = r + (255 - r) * t;
+        g = g + (255 - g) * t;
+        b = b + (255 - b) * t;
+      } else if (t < 0) {
+        const f = 1 + t;
+        r *= f; g *= f; b *= f;
+      }
+      return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
     }
-    return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
-  }
 
-  function genImportance() {
-    const arr = [];
+    function genImportance() {
+      const arr = [];
+      for (let i = 0; i < MID_CH; i++) {
+        const v = Math.sin(i * 0.73 + 1.4) * 0.5 + 0.5;
+        const w = Math.cos(i * 1.13 + 2.7) * 0.5 + 0.5;
+        arr.push(0.2 + 0.55 * v + 0.25 * w);
+      }
+      return arr;
+    }
+    const importance = genImportance();
+    const sortedByImp = importance.map((v, i) => ({ v, i }))
+      .sort((a, b) => b.v - a.v).map(o => o.i);
+
+    function computeNKeep(ratio) {
+      const raw = Math.floor(MID_CH * (1 - ratio));
+      return Math.max(Math.floor(raw / NUM_GROUPS) * NUM_GROUPS, NUM_GROUPS);
+    }
+    function getKeepSet(nKeep) { return new Set(sortedByImp.slice(0, nKeep)); }
+    function paramsAt(nKeep) { return nKeep * (IN_CH + K * K + OUT_CH); }
+
+    const totalBefore = paramsAt(MID_CH);
+
+    const wrap = document.getElementById('pw-canvas');
+    const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    wrap.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, wrap.clientWidth / wrap.clientHeight, 0.1, 200);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xdcdcdc, 0.55));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.95);
+    keyLight.position.set(8, 14, 6);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 60;
+    keyLight.shadow.camera.left = -22;
+    keyLight.shadow.camera.right = 22;
+    keyLight.shadow.camera.top = 22;
+    keyLight.shadow.camera.bottom = -22;
+    keyLight.shadow.bias = -0.0005;
+    scene.add(keyLight);
+    const fill = new THREE.DirectionalLight(0xffffff, 0.3);
+    fill.position.set(-6, 4, -4);
+    scene.add(fill);
+
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(120, 120),
+      new THREE.ShadowMaterial({ opacity: 0.18 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -4.0;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    function makeRoundedBox(size, radius, sm) {
+      const shape = new THREE.Shape();
+      const eps = 1e-5;
+      const r = radius - eps;
+      shape.absarc(eps, eps, eps, -Math.PI / 2, -Math.PI, true);
+      shape.absarc(eps, size - r * 2, eps, Math.PI, Math.PI / 2, true);
+      shape.absarc(size - r * 2, size - r * 2, eps, Math.PI / 2, 0, true);
+      shape.absarc(size - r * 2, eps, eps, 0, -Math.PI / 2, true);
+      const geo = new THREE.ExtrudeGeometry(shape, {
+        depth: size - radius * 2,
+        bevelEnabled: true,
+        bevelSegments: sm,
+        steps: 1,
+        bevelSize: radius,
+        bevelThickness: radius,
+        curveSegments: sm
+      });
+      geo.center();
+      geo.computeVertexNormals();
+      return geo;
+    }
+    const cubeGeo = makeRoundedBox(0.85, 0.1, 4);
+    const barGeo = new THREE.BoxGeometry(0.42, 1, 0.42);
+
+    const palette = { red: 0xE85D5D, teal: 0x4FB6A8, purple: 0x9B86E0 };
+
+    // Materials are constructed with emissive=white at intensity 0;
+    // the animate() loop modulates emissiveIntensity during highlight pulses.
+    function makeMat(hex) {
+      return new THREE.MeshPhysicalMaterial({
+        color: hex, metalness: 0, roughness: 0.5,
+        clearcoat: 0.35, clearcoatRoughness: 0.45,
+        transparent: true, opacity: 1,
+        emissive: 0xffffff, emissiveIntensity: 0
+      });
+    }
+    function makeBarMat() {
+      return new THREE.MeshStandardMaterial({
+        color: 0xa0a0a0, roughness: 0.7,
+        transparent: true, opacity: 0.85,
+        emissive: 0xffffff, emissiveIntensity: 0
+      });
+    }
+
+    const channelMats = [];
     for (let i = 0; i < MID_CH; i++) {
-      const v = Math.sin(i * 0.73 + 1.4) * 0.5 + 0.5;
-      const w = Math.cos(i * 1.13 + 2.7) * 0.5 + 0.5;
-      arr.push(0.2 + 0.55 * v + 0.25 * w);
+      const g = Math.floor(i / GROUP_SIZE);
+      const t = GROUP_TINTS[g];
+      channelMats.push({
+        expand: makeMat(tintColor(palette.red, t)),
+        dw: makeMat(tintColor(palette.teal, t)),
+        project: makeMat(tintColor(palette.purple, t)),
+        bar: makeBarMat()
+      });
     }
-    return arr;
-  }
-  const importance = genImportance();
-  const sortedByImp = importance.map((v, i) => ({ v, i }))
-    .sort((a, b) => b.v - a.v).map(o => o.i);
 
-  function computeNKeep(ratio) {
-    const raw = Math.floor(MID_CH * (1 - ratio));
-    return Math.max(Math.floor(raw / NUM_GROUPS) * NUM_GROUPS, NUM_GROUPS);
-  }
-  function getKeepSet(nKeep) { return new Set(sortedByImp.slice(0, nKeep)); }
-  function paramsAt(nKeep) { return nKeep * (IN_CH + K * K + OUT_CH); }
+    const X_EXPAND = -7, X_DW = 0, X_PROJ = 7, SP = 1.0;
+    const Z_OFFSET = (MID_CH - 1) / 2;
+    const BAR_BASE_Y = 3.5;
 
-  const totalBefore = paramsAt(MID_CH);
+    const initialPositions = new Array(MID_CH);
+    for (let i = 0; i < MID_CH; i++) initialPositions[i] = (i - Z_OFFSET) * SP;
 
-  const wrap = document.getElementById('pw-canvas');
-  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const channels = [];
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  wrap.appendChild(renderer.domElement);
+    for (let i = 0; i < MID_CH; i++) {
+      const grp = new THREE.Group();
+      grp.position.z = initialPositions[i];
+      const m = channelMats[i];
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(35, wrap.clientWidth / wrap.clientHeight, 0.1, 200);
-
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xdcdcdc, 0.55));
-  const keyLight = new THREE.DirectionalLight(0xffffff, 0.95);
-  keyLight.position.set(8, 14, 6);
-  keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(2048, 2048);
-  keyLight.shadow.camera.near = 0.5;
-  keyLight.shadow.camera.far = 60;
-  keyLight.shadow.camera.left = -22;
-  keyLight.shadow.camera.right = 22;
-  keyLight.shadow.camera.top = 22;
-  keyLight.shadow.camera.bottom = -22;
-  keyLight.shadow.bias = -0.0005;
-  scene.add(keyLight);
-  const fill = new THREE.DirectionalLight(0xffffff, 0.3);
-  fill.position.set(-6, 4, -4);
-  scene.add(fill);
-
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(120, 120),
-    new THREE.ShadowMaterial({ opacity: 0.18 })
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -4.0;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  function makeRoundedBox(size, radius, sm) {
-    const shape = new THREE.Shape();
-    const eps = 1e-5;
-    const r = radius - eps;
-    shape.absarc(eps, eps, eps, -Math.PI / 2, -Math.PI, true);
-    shape.absarc(eps, size - r * 2, eps, Math.PI, Math.PI / 2, true);
-    shape.absarc(size - r * 2, size - r * 2, eps, Math.PI / 2, 0, true);
-    shape.absarc(size - r * 2, eps, eps, 0, -Math.PI / 2, true);
-    const geo = new THREE.ExtrudeGeometry(shape, {
-      depth: size - radius * 2,
-      bevelEnabled: true,
-      bevelSegments: sm,
-      steps: 1,
-      bevelSize: radius,
-      bevelThickness: radius,
-      curveSegments: sm
-    });
-    geo.center();
-    geo.computeVertexNormals();
-    return geo;
-  }
-  const cubeGeo = makeRoundedBox(0.85, 0.1, 4);
-  const barGeo = new THREE.BoxGeometry(0.42, 1, 0.42);
-
-  const palette = { red: 0xE85D5D, teal: 0x4FB6A8, purple: 0x9B86E0 };
-
-  // Materials are constructed with emissive=white at intensity 0;
-  // the animate() loop modulates emissiveIntensity during highlight pulses.
-  function makeMat(hex) {
-    return new THREE.MeshPhysicalMaterial({
-      color: hex, metalness: 0, roughness: 0.5,
-      clearcoat: 0.35, clearcoatRoughness: 0.45,
-      transparent: true, opacity: 1,
-      emissive: 0xffffff, emissiveIntensity: 0
-    });
-  }
-  function makeBarMat() {
-    return new THREE.MeshStandardMaterial({
-      color: 0xa0a0a0, roughness: 0.7,
-      transparent: true, opacity: 0.85,
-      emissive: 0xffffff, emissiveIntensity: 0
-    });
-  }
-
-  const channelMats = [];
-  for (let i = 0; i < MID_CH; i++) {
-    const g = Math.floor(i / GROUP_SIZE);
-    const t = GROUP_TINTS[g];
-    channelMats.push({
-      expand: makeMat(tintColor(palette.red, t)),
-      dw: makeMat(tintColor(palette.teal, t)),
-      project: makeMat(tintColor(palette.purple, t)),
-      bar: makeBarMat()
-    });
-  }
-
-  const X_EXPAND = -7, X_DW = 0, X_PROJ = 7, SP = 1.0;
-  const Z_OFFSET = (MID_CH - 1) / 2;
-  const BAR_BASE_Y = 3.5;
-
-  const initialPositions = new Array(MID_CH);
-  for (let i = 0; i < MID_CH; i++) initialPositions[i] = (i - Z_OFFSET) * SP;
-
-  const channels = [];
-
-  for (let i = 0; i < MID_CH; i++) {
-    const grp = new THREE.Group();
-    grp.position.z = initialPositions[i];
-    const m = channelMats[i];
-
-    for (let y = 0; y < IN_CH; y++) {
-      const c = new THREE.Mesh(cubeGeo, m.expand);
-      c.position.set(X_EXPAND, (y - (IN_CH - 1) / 2) * SP, 0);
-      c.castShadow = true; c.receiveShadow = true;
-      grp.add(c);
-    }
-    for (let yi = 0; yi < K; yi++) {
-      for (let xi = 0; xi < K; xi++) {
-        const c = new THREE.Mesh(cubeGeo, m.dw);
-        c.position.set(X_DW + (xi - 1) * SP, (yi - 1) * SP, 0);
+      for (let y = 0; y < IN_CH; y++) {
+        const c = new THREE.Mesh(cubeGeo, m.expand);
+        c.position.set(X_EXPAND, (y - (IN_CH - 1) / 2) * SP, 0);
         c.castShadow = true; c.receiveShadow = true;
         grp.add(c);
       }
-    }
-    for (let y = 0; y < OUT_CH; y++) {
-      const c = new THREE.Mesh(cubeGeo, m.project);
-      c.position.set(X_PROJ, (y - (OUT_CH - 1) / 2) * SP, 0);
-      c.castShadow = true; c.receiveShadow = true;
-      grp.add(c);
-    }
-
-    const barH = 0.4 + importance[i] * 2.4;
-    const bar = new THREE.Mesh(barGeo, m.bar);
-    bar.scale.y = barH;
-    bar.position.set(0, BAR_BASE_Y + barH / 2, 0);
-    bar.castShadow = true;
-    grp.add(bar);
-
-    scene.add(grp);
-    channels.push({
-      group: grp,
-      mats: m,
-      vis: 1,
-      target: 1,
-      removalStartTime: null  // timestamp when target went 1->0; null otherwise
-    });
-  }
-
-  function makeLabel(text) {
-    const c = document.createElement('canvas');
-    c.width = 320; c.height = 72;
-    const ctx = c.getContext('2d');
-    ctx.font = '500 30px system-ui, -apple-system, sans-serif';
-    ctx.fillStyle = isDark ? '#bbb' : '#555';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, 160, 36);
-    const tex = new THREE.CanvasTexture(c);
-    tex.minFilter = THREE.LinearFilter;
-    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
-    const s = new THREE.Sprite(mat);
-    s.scale.set(5, 1.1, 1);
-    return s;
-  }
-  const lblZBase = (Z_OFFSET + 1.5) * SP;
-  const lblY = -3.5;
-  const l1 = makeLabel('expand 1×1'); l1.position.set(X_EXPAND, lblY, lblZBase); scene.add(l1);
-  const l2 = makeLabel('DW 3×3'); l2.position.set(X_DW, lblY, lblZBase); scene.add(l2);
-  const l3 = makeLabel('project 1×1'); l3.position.set(X_PROJ, lblY, lblZBase); scene.add(l3);
-
-  let compactZPositions = initialPositions.slice();
-  let currentNKeep = MID_CH;
-  let compactAmount = 0;
-  let compactTarget = 0;
-
-  function recomputeCompactPositions(keepSet, n_keep) {
-    const positions = new Array(MID_CH);
-    let rank = 0;
-    for (let i = 0; i < MID_CH; i++) {
-      if (keepSet.has(i)) {
-        positions[i] = (rank - (n_keep - 1) / 2) * SP;
-        rank++;
-      }
-    }
-    for (let i = 0; i < MID_CH; i++) {
-      if (!keepSet.has(i)) {
-        let p = null;
-        for (let d = 1; d < MID_CH; d++) {
-          if (i + d < MID_CH && keepSet.has(i + d)) { p = positions[i + d]; break; }
-          if (i - d >= 0 && keepSet.has(i - d)) { p = positions[i - d]; break; }
-        }
-        positions[i] = p !== null ? p : 0;
-      }
-    }
-    return positions;
-  }
-
-  let azimuth = Math.PI * 0.58, polar = Math.PI * 0.42, distance = 36;
-  const target = new THREE.Vector3(0, 1, 0);
-  function updateCamera() {
-    const sp = Math.sin(polar), cp = Math.cos(polar);
-    const sa = Math.sin(azimuth), ca = Math.cos(azimuth);
-    camera.position.set(
-      target.x + distance * sp * ca,
-      target.y + distance * cp,
-      target.z + distance * sp * sa
-    );
-    camera.lookAt(target);
-  }
-  updateCamera();
-
-  const canvas = renderer.domElement;
-  let isDragging = false, lastX = 0, lastY = 0, pinchD = 0;
-  function onDown(x, y) { isDragging = true; lastX = x; lastY = y; wrap.classList.add('grabbing'); }
-  function onMove(x, y) {
-    if (!isDragging) return;
-    azimuth -= (x - lastX) * 0.008;
-    polar -= (y - lastY) * 0.008;
-    polar = Math.max(0.15, Math.min(Math.PI - 0.15, polar));
-    lastX = x; lastY = y;
-    updateCamera();
-  }
-  function onUp() { isDragging = false; wrap.classList.remove('grabbing'); }
-
-  canvas.addEventListener('mousedown', e => onDown(e.clientX, e.clientY));
-  window.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
-  window.addEventListener('mouseup', onUp);
-  canvas.addEventListener('wheel', e => {
-    e.preventDefault();
-    distance *= 1 + e.deltaY * 0.0012;
-    distance = Math.max(15, Math.min(60, distance));
-    updateCamera();
-  }, { passive: false });
-  canvas.addEventListener('touchstart', e => {
-    if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY);
-    else if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      pinchD = Math.hypot(dx, dy);
-    }
-  }, { passive: true });
-  canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY);
-    else if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const nd = Math.hypot(dx, dy);
-      if (pinchD > 0) {
-        distance *= pinchD / nd;
-        distance = Math.max(15, Math.min(60, distance));
-        updateCamera();
-      }
-      pinchD = nd;
-    }
-  }, { passive: false });
-  canvas.addEventListener('touchend', () => { onUp(); pinchD = 0; });
-
-  const slider = document.getElementById('pw-slider');
-  const sliderVal = document.getElementById('pw-slider-val');
-  const keepEl = document.getElementById('pw-keep');
-  const beforeEl = document.getElementById('pw-before');
-  const afterEl = document.getElementById('pw-after');
-  const savingsEl = document.getElementById('pw-savings');
-
-  beforeEl.textContent = totalBefore;
-
-  const rec = { active: false, mr: null, startTime: 0, startAzimuth: 0 };
-
-  function applyPrune() {
-    const ratio = parseFloat(slider.value);
-    const nKeep = computeNKeep(ratio);
-    const keep = getKeepSet(nKeep);
-    const after = paramsAt(nKeep);
-
-    sliderVal.textContent = Math.round(ratio * 100) + '%';
-    keepEl.textContent = nKeep;
-    afterEl.textContent = after;
-    savingsEl.textContent = Math.round((1 - after / totalBefore) * 100) + '%';
-
-    const now = performance.now();
-    for (let i = 0; i < MID_CH; i++) {
-      const newTarget = keep.has(i) ? 1 : 0;
-      const ch = channels[i];
-      // Detect the 1 -> 0 transition: this channel is newly being pruned.
-      // Start its highlight phase so the user sees it pulse before it fades.
-      if (newTarget === 0 && ch.target === 1) {
-        ch.removalStartTime = now;
-      } else if (newTarget === 1 && ch.target === 0) {
-        ch.removalStartTime = null;
-      }
-      ch.target = newTarget;
-    }
-
-    currentNKeep = nKeep;
-    compactZPositions = recomputeCompactPositions(keep, nKeep);
-
-    if (!rec.active) {
-      compactTarget = ratio > 0 ? 1 : 0;
-    }
-  }
-
-  slider.addEventListener('input', applyPrune);
-  applyPrune();
-
-  if (typeof ResizeObserver !== 'undefined') {
-    const ro = new ResizeObserver(() => {
-      const w = wrap.clientWidth, h = wrap.clientHeight;
-      if (w > 0 && h > 0) {
-        renderer.setSize(w, h);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-      }
-    });
-    ro.observe(wrap);
-  }
-
-  // Recording: hold → три шага (25 / 50 / 75%) с паузами → compact → hold
-  // Каждый шаг срабатывает ровно один раз (rec.stepsDone)
-  const REC_STEPS = [
-    { t: 1100,  ratio: '0.25' },
-    { t: 3200,  ratio: '0.50' },
-    { t: 5300,  ratio: '0.75' },
-  ];
-  const REC_COMPACT_START = 7200;   // ms — старт компактирования
-  const REC_COMPACT_DUR   = 2200;   // ms — длительность компактирования
-  const REC_TOTAL = REC_COMPACT_START + REC_COMPACT_DUR + 1800;
-
-  function animate(now) {
-    requestAnimationFrame(animate);
-    const tNow = now !== undefined ? now : performance.now();
-
-    compactAmount += (compactTarget - compactAmount) * COMPACT_LERP;
-
-    for (let i = 0; i < MID_CH; i++) {
-      const ch = channels[i];
-
-      // --- Highlight phase ---
-      // While a channel is in its highlight window, hold visibility at 1
-      // and pulse the emissive + scale. After the window expires, let the
-      // channel fade out as usual.
-      let highlight = 0;
-      let holdVisible = false;
-      if (ch.removalStartTime !== null) {
-        const elapsed = tNow - ch.removalStartTime;
-        if (elapsed < HIGHLIGHT_DURATION_MS) {
-          // sine arc: 0 -> 1 -> 0 across the highlight window
-          highlight = Math.sin((elapsed / HIGHLIGHT_DURATION_MS) * Math.PI);
-          holdVisible = true;
+      for (let yi = 0; yi < K; yi++) {
+        for (let xi = 0; xi < K; xi++) {
+          const c = new THREE.Mesh(cubeGeo, m.dw);
+          c.position.set(X_DW + (xi - 1) * SP, (yi - 1) * SP, 0);
+          c.castShadow = true; c.receiveShadow = true;
+          grp.add(c);
         }
       }
+      for (let y = 0; y < OUT_CH; y++) {
+        const c = new THREE.Mesh(cubeGeo, m.project);
+        c.position.set(X_PROJ, (y - (OUT_CH - 1) / 2) * SP, 0);
+        c.castShadow = true; c.receiveShadow = true;
+        grp.add(c);
+      }
 
-      // --- Visibility ---
-      const visTarget = (ch.target === 1 || holdVisible) ? 1 : 0;
-      ch.vis += (visTarget - ch.vis) * VIS_LERP;
-      const v = Math.max(0, Math.min(1, ch.vis));
+      const barH = 0.4 + importance[i] * 2.4;
+      const bar = new THREE.Mesh(barGeo, m.bar);
+      bar.scale.y = barH;
+      bar.position.set(0, BAR_BASE_Y + barH / 2, 0);
+      bar.castShadow = true;
+      grp.add(bar);
 
-      const op = v < 0.5 ? Math.max(0.06, v * 0.6) : 1;
-      ch.mats.expand.opacity  = op;
-      ch.mats.dw.opacity      = op;
-      ch.mats.project.opacity = op;
-      ch.mats.bar.opacity     = v < 0.5 ? Math.max(0.06, v * 0.5) : 0.85;
-
-      // --- Highlight emissive pulse (cubes + bar) ---
-      const cubeEmissive = highlight * HIGHLIGHT_PEAK;
-      const barEmissive  = highlight * HIGHLIGHT_BAR;
-      ch.mats.expand.emissiveIntensity  = cubeEmissive;
-      ch.mats.dw.emissiveIntensity      = cubeEmissive;
-      ch.mats.project.emissiveIntensity = cubeEmissive;
-      ch.mats.bar.emissiveIntensity     = barEmissive;
-
-      // --- Scale: vis collapse on y/z, plus a uniform pulse during highlight ---
-      const baseScaleYZ = 0.05 + 0.95 * v;
-      const pulse = 1 + highlight * HIGHLIGHT_SCALE;
-      ch.group.scale.set(pulse, baseScaleYZ * pulse, baseScaleYZ * pulse);
-
-      // --- Position: interpolate between initial and compact target ---
-      const targetZ = initialPositions[i] * (1 - compactAmount) + compactZPositions[i] * compactAmount;
-      ch.group.position.z += (targetZ - ch.group.position.z) * POS_LERP;
+      scene.add(grp);
+      channels.push({
+        group: grp,
+        mats: m,
+        vis: 1,
+        target: 1,
+        removalStartTime: null  // timestamp when target went 1->0; null otherwise
+      });
     }
 
-    // Move tensor labels with the (shrinking) tensor front
-    const lblZ1 = ((currentNKeep - 1) / 2 + 1.5) * SP;
-    const lblZTarget = lblZBase * (1 - compactAmount) + lblZ1 * compactAmount;
-    l1.position.z += (lblZTarget - l1.position.z) * POS_LERP;
-    l2.position.z = l1.position.z;
-    l3.position.z = l1.position.z;
+    function makeLabel(text) {
+      const c = document.createElement('canvas');
+      c.width = 320; c.height = 72;
+      const ctx = c.getContext('2d');
+      ctx.font = '500 30px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = isDark ? '#bbb' : '#555';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 160, 36);
+      const tex = new THREE.CanvasTexture(c);
+      tex.minFilter = THREE.LinearFilter;
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+      const s = new THREE.Sprite(mat);
+      s.scale.set(5, 1.1, 1);
+      return s;
+    }
+    const lblZBase = (Z_OFFSET + 1.5) * SP;
+    const lblY = -3.5;
+    const l1 = makeLabel('expand 1x1'); l1.position.set(X_EXPAND, lblY, lblZBase); scene.add(l1);
+    const l2 = makeLabel('DW 3x3'); l2.position.set(X_DW, lblY, lblZBase); scene.add(l2);
+    const l3 = makeLabel('project 1x1'); l3.position.set(X_PROJ, lblY, lblZBase); scene.add(l3);
 
-    if (rec.active && now !== undefined) {
-      const elapsed = now - rec.startTime;
-      azimuth = rec.startAzimuth + elapsed * 0.00018;
+    let compactZPositions = initialPositions.slice();
+    let currentNKeep = MID_CH;
+    let compactAmount = 0;
+    let compactTarget = 0;
+
+    function recomputeCompactPositions(keepSet, n_keep) {
+      const positions = new Array(MID_CH);
+      let rank = 0;
+      for (let i = 0; i < MID_CH; i++) {
+        if (keepSet.has(i)) {
+          positions[i] = (rank - (n_keep - 1) / 2) * SP;
+          rank++;
+        }
+      }
+      for (let i = 0; i < MID_CH; i++) {
+        if (!keepSet.has(i)) {
+          let p = null;
+          for (let d = 1; d < MID_CH; d++) {
+            if (i + d < MID_CH && keepSet.has(i + d)) { p = positions[i + d]; break; }
+            if (i - d >= 0 && keepSet.has(i - d)) { p = positions[i - d]; break; }
+          }
+          positions[i] = p !== null ? p : 0;
+        }
+      }
+      return positions;
+    }
+
+    let azimuth = Math.PI * 0.58, polar = Math.PI * 0.42, distance = 36;
+    const target = new THREE.Vector3(0, 1, 0);
+    function updateCamera() {
+      const sp = Math.sin(polar), cp = Math.cos(polar);
+      const sa = Math.sin(azimuth), ca = Math.cos(azimuth);
+      camera.position.set(
+        target.x + distance * sp * ca,
+        target.y + distance * cp,
+        target.z + distance * sp * sa
+      );
+      camera.lookAt(target);
+    }
+    updateCamera();
+
+    const canvas = renderer.domElement;
+    let isDragging = false, lastX = 0, lastY = 0, pinchD = 0;
+    function onDown(x, y) { isDragging = true; lastX = x; lastY = y; wrap.classList.add('grabbing'); }
+    function onMove(x, y) {
+      if (!isDragging) return;
+      azimuth -= (x - lastX) * 0.008;
+      polar -= (y - lastY) * 0.008;
+      polar = Math.max(0.15, Math.min(Math.PI - 0.15, polar));
+      lastX = x; lastY = y;
       updateCamera();
+    }
+    function onUp() { isDragging = false; wrap.classList.remove('grabbing'); }
 
-      // каждый шаг срабатывает ровно один раз
-      for (const step of REC_STEPS) {
-        if (!rec.stepsDone.has(step.t) && elapsed >= step.t) {
-          slider.value = step.ratio;
-          applyPrune();
-          rec.stepsDone.add(step.t);
+    canvas.addEventListener('mousedown', e => onDown(e.clientX, e.clientY));
+    window.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', onUp);
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      distance *= 1 + e.deltaY * 0.0012;
+      distance = Math.max(15, Math.min(60, distance));
+      updateCamera();
+    }, { passive: false });
+    canvas.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY);
+      else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        pinchD = Math.hypot(dx, dy);
+      }
+    }, { passive: true });
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY);
+      else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const nd = Math.hypot(dx, dy);
+        if (pinchD > 0) {
+          distance *= pinchD / nd;
+          distance = Math.max(15, Math.min(60, distance));
+          updateCamera();
+        }
+        pinchD = nd;
+      }
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => { onUp(); pinchD = 0; });
+
+    const slider = document.getElementById('pw-slider');
+    const sliderVal = document.getElementById('pw-slider-val');
+    const keepEl = document.getElementById('pw-keep');
+    const beforeEl = document.getElementById('pw-before');
+    const afterEl = document.getElementById('pw-after');
+    const savingsEl = document.getElementById('pw-savings');
+
+    beforeEl.textContent = totalBefore;
+
+    const rec = { active: false, mr: null, startTime: 0, startAzimuth: 0 };
+
+    function applyPrune() {
+      const ratio = parseFloat(slider.value);
+      const nKeep = computeNKeep(ratio);
+      const keep = getKeepSet(nKeep);
+      const after = paramsAt(nKeep);
+
+      sliderVal.textContent = Math.round(ratio * 100) + '%';
+      keepEl.textContent = nKeep;
+      afterEl.textContent = after;
+      savingsEl.textContent = Math.round((1 - after / totalBefore) * 100) + '%';
+
+      const now = performance.now();
+      for (let i = 0; i < MID_CH; i++) {
+        const newTarget = keep.has(i) ? 1 : 0;
+        const ch = channels[i];
+        // Detect the 1 -> 0 transition: this channel is newly being pruned.
+        // Start its highlight phase so the user sees it pulse before it fades.
+        if (newTarget === 0 && ch.target === 1) {
+          ch.removalStartTime = now;
+        } else if (newTarget === 1 && ch.target === 0) {
+          ch.removalStartTime = null;
+        }
+        ch.target = newTarget;
+      }
+
+      currentNKeep = nKeep;
+      compactZPositions = recomputeCompactPositions(keep, nKeep);
+
+      if (!rec.active) {
+        compactTarget = ratio > 0 ? 1 : 0;
+      }
+    }
+
+    slider.addEventListener('input', applyPrune);
+    applyPrune();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => {
+        const w = wrap.clientWidth, h = wrap.clientHeight;
+        if (w > 0 && h > 0) {
+          renderer.setSize(w, h);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+      });
+      ro.observe(wrap);
+    }
+
+    // Recording: hold → три шага (25 / 50 / 75%) с паузами → compact → hold
+    // Каждый шаг срабатывает ровно один раз (rec.stepsDone)
+    const REC_STEPS = [
+      { t: 1100, ratio: '0.25' },
+      { t: 3200, ratio: '0.50' },
+      { t: 5300, ratio: '0.75' },
+    ];
+    const REC_COMPACT_START = 7200;   // ms — старт компактирования
+    const REC_COMPACT_DUR = 2200;   // ms — длительность компактирования
+    const REC_TOTAL = REC_COMPACT_START + REC_COMPACT_DUR + 1800;
+
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const tNow = now !== undefined ? now : performance.now();
+
+      compactAmount += (compactTarget - compactAmount) * COMPACT_LERP;
+
+      for (let i = 0; i < MID_CH; i++) {
+        const ch = channels[i];
+
+        // --- Highlight phase ---
+        // While a channel is in its highlight window, hold visibility at 1
+        // and pulse the emissive + scale. After the window expires, let the
+        // channel fade out as usual.
+        let highlight = 0;
+        let holdVisible = false;
+        if (ch.removalStartTime !== null) {
+          const elapsed = tNow - ch.removalStartTime;
+          if (elapsed < HIGHLIGHT_DURATION_MS) {
+            // sine arc: 0 -> 1 -> 0 across the highlight window
+            highlight = Math.sin((elapsed / HIGHLIGHT_DURATION_MS) * Math.PI);
+            holdVisible = true;
+          }
+        }
+
+        // --- Visibility ---
+        const visTarget = (ch.target === 1 || holdVisible) ? 1 : 0;
+        ch.vis += (visTarget - ch.vis) * VIS_LERP;
+        const v = Math.max(0, Math.min(1, ch.vis));
+
+        const op = v < 0.5 ? Math.max(0.06, v * 0.6) : 1;
+        ch.mats.expand.opacity = op;
+        ch.mats.dw.opacity = op;
+        ch.mats.project.opacity = op;
+        ch.mats.bar.opacity = v < 0.5 ? Math.max(0.06, v * 0.5) : 0.85;
+
+        // --- Highlight emissive pulse (cubes + bar) ---
+        const cubeEmissive = highlight * HIGHLIGHT_PEAK;
+        const barEmissive = highlight * HIGHLIGHT_BAR;
+        ch.mats.expand.emissiveIntensity = cubeEmissive;
+        ch.mats.dw.emissiveIntensity = cubeEmissive;
+        ch.mats.project.emissiveIntensity = cubeEmissive;
+        ch.mats.bar.emissiveIntensity = barEmissive;
+
+        // --- Scale: vis collapse on y/z, plus a uniform pulse during highlight ---
+        const baseScaleYZ = 0.05 + 0.95 * v;
+        const pulse = 1 + highlight * HIGHLIGHT_SCALE;
+        ch.group.scale.set(pulse, baseScaleYZ * pulse, baseScaleYZ * pulse);
+
+        // --- Position: interpolate between initial and compact target ---
+        const targetZ = initialPositions[i] * (1 - compactAmount) + compactZPositions[i] * compactAmount;
+        ch.group.position.z += (targetZ - ch.group.position.z) * POS_LERP;
+      }
+
+      // Move tensor labels with the (shrinking) tensor front
+      const lblZ1 = ((currentNKeep - 1) / 2 + 1.5) * SP;
+      const lblZTarget = lblZBase * (1 - compactAmount) + lblZ1 * compactAmount;
+      l1.position.z += (lblZTarget - l1.position.z) * POS_LERP;
+      l2.position.z = l1.position.z;
+      l3.position.z = l1.position.z;
+
+      if (rec.active && now !== undefined) {
+        const elapsed = now - rec.startTime;
+        azimuth = rec.startAzimuth + elapsed * 0.00018;
+        updateCamera();
+
+        // каждый шаг срабатывает ровно один раз
+        for (const step of REC_STEPS) {
+          if (!rec.stepsDone.has(step.t) && elapsed >= step.t) {
+            slider.value = step.ratio;
+            applyPrune();
+            rec.stepsDone.add(step.t);
+          }
+        }
+
+        // компактирование — плавный ease-in-out после всех шагов
+        if (elapsed >= REC_COMPACT_START) {
+          const t = Math.min(1, (elapsed - REC_COMPACT_START) / REC_COMPACT_DUR);
+          const tE = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          compactTarget = tE;
+        } else {
+          compactTarget = 0;
+        }
+
+        if (elapsed >= REC_TOTAL && rec.mr && rec.mr.state === 'recording') {
+          rec.active = false;
+          rec.mr.stop();
         }
       }
 
-      // компактирование — плавный ease-in-out после всех шагов
-      if (elapsed >= REC_COMPACT_START) {
-        const t = Math.min(1, (elapsed - REC_COMPACT_START) / REC_COMPACT_DUR);
-        const tE = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        compactTarget = tE;
-      } else {
-        compactTarget = 0;
-      }
-
-      if (elapsed >= REC_TOTAL && rec.mr && rec.mr.state === 'recording') {
-        rec.active = false;
-        rec.mr.stop();
-      }
+      renderer.render(scene, camera);
     }
+    animate();
 
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  const recBtn = document.getElementById('pw-record-btn');
-  recBtn.addEventListener('click', () => {
-    if (rec.active) return;
-    slider.value = 0; applyPrune();
-    compactAmount = 0;
-    compactTarget = 0;
-    rec.stepsDone = new Set();
-    for (let i = 0; i < MID_CH; i++) {
-      const ch = channels[i];
-      ch.group.position.z = initialPositions[i];
-      ch.removalStartTime = null;
-      ch.mats.expand.emissiveIntensity = 0;
-      ch.mats.dw.emissiveIntensity = 0;
-      ch.mats.project.emissiveIntensity = 0;
-      ch.mats.bar.emissiveIntensity = 0;
-    }
-    l1.position.z = lblZBase;
-    l2.position.z = lblZBase;
-    l3.position.z = lblZBase;
-
-    const chunks = [];
-    const stream = renderer.domElement.captureStream(30);
-    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9' : 'video/webm';
-    const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 10_000_000 });
-    mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    mr.onstop = () => {
-      const blob = new Blob(chunks, { type: mime });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'structured_pruning.webm';
-      a.click();
-      recBtn.textContent = '⏺ Record';
-      recBtn.classList.remove('recording');
-      recBtn.disabled = false;
+    const recBtn = document.getElementById('pw-record-btn');
+    recBtn.addEventListener('click', () => {
+      if (rec.active) return;
       slider.value = 0; applyPrune();
-    };
-    mr.start();
-    rec.mr = mr;
-    rec.startTime = performance.now();
-    rec.startAzimuth = azimuth;
-    rec.active = true;
-    recBtn.textContent = '● Recording…';
-    recBtn.classList.add('recording');
-    recBtn.disabled = true;
-  });
-})();
+      compactAmount = 0;
+      compactTarget = 0;
+      rec.stepsDone = new Set();
+      for (let i = 0; i < MID_CH; i++) {
+        const ch = channels[i];
+        ch.group.position.z = initialPositions[i];
+        ch.removalStartTime = null;
+        ch.mats.expand.emissiveIntensity = 0;
+        ch.mats.dw.emissiveIntensity = 0;
+        ch.mats.project.emissiveIntensity = 0;
+        ch.mats.bar.emissiveIntensity = 0;
+      }
+      l1.position.z = lblZBase;
+      l2.position.z = lblZBase;
+      l3.position.z = lblZBase;
+
+      const chunks = [];
+      const stream = renderer.domElement.captureStream(30);
+      const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9' : 'video/webm';
+      const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 10_000_000 });
+      mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+      mr.onstop = () => {
+        const blob = new Blob(chunks, { type: mime });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'structured_pruning.webm';
+        a.click();
+        recBtn.textContent = '⏺ Record';
+        recBtn.classList.remove('recording');
+        recBtn.disabled = false;
+        slider.value = 0; applyPrune();
+      };
+      mr.start();
+      rec.mr = mr;
+      rec.startTime = performance.now();
+      rec.startAzimuth = azimuth;
+      rec.active = true;
+      recBtn.textContent = '● Recording…';
+      recBtn.classList.add('recording');
+      recBtn.disabled = true;
+    });
+  })();
 </script>
