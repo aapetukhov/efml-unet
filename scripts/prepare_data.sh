@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create train/val/test splits from raw DIV2K images using symlinks.
+# Create train/val/test splits from raw DIV2K
 # Expects data/raw/DIV2K_train_HR/ (0001-0800) and data/raw/DIV2K_valid_HR/ (0801-0900).
 # Usage: bash scripts/prepare_data.sh
 set -euo pipefail
