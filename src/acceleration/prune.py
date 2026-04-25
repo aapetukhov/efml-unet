@@ -5,7 +5,7 @@ from torch.nn.utils import prune
 
 
 def apply_global_magnitude_pruning(model: nn.Module, prune_ratio: float) -> None:
-    """Zero out the globally lowest-L1 fraction of weights in all 1×1 Conv2d layers.
+    """Zero out the globally lowest-L1 fraction of weights in all 1x1 Conv2d layers.
 
     Uses torch.nn.utils.prune reparametrization — call make_pruning_permanent
     afterwards to bake masks into weights and remove hooks.
