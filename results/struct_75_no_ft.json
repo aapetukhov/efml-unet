@@ -1,0 +1,34 @@
+{
+  "method": "structural_expand_prune",
+  "timestamp": "2026-04-25T02:37:52.327034",
+  "checkpoint_in": "checkpoints/heavy_srunet_29M.pt",
+  "checkpoint_out": "checkpoints/struct_75.pt",
+  "baseline": {
+    "ssim": 0.7689,
+    "latency_ms": 33.78,
+    "params_M": 29.26
+  },
+  "result": {
+    "ssim": 0.5621,
+    "latency_ms": 14.9,
+    "params_M": 8.44
+  },
+  "speedup": 2.268,
+  "ssim_drop": 0.2068,
+  "param_ratio": 0.288,
+  "prune_ratio": 0.75,
+  "finetuned": false,
+  "finetune_epochs": 0,
+  "block_mid_channels": {
+    "inc": 96,
+    "down1.block": 96,
+    "down2.block": 192,
+    "down3.block": 384,
+    "down4.block": 768,
+    "bottleneck.0": 768,
+    "up1.block": 1536,
+    "up2.block": 768,
+    "up3.block": 384,
+    "up4.block": 192
+  }
+}
