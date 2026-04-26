@@ -8,12 +8,7 @@ from src.model.heavy_model import MBResBlock
 
 
 class Pointwise2d(nn.Module):
-    """1x1 Conv2d drop-in that routes through nn.Linear.
-
-    SparseSemiStructuredTensor accelerates F.linear via cuSPARSELt, but
-    NOT F.conv2d — even with kernel_size=1. Replacing expand/project convs
-    with this wrapper is the correct path to hardware 2:4 speedup on Ampere+.
-    """
+    # cuSPARSELt accelerates F.linear but NOT F.conv2d, even with kernel_size=1.
 
     def __init__(self, linear: nn.Linear):
         super().__init__()
@@ -36,13 +31,6 @@ def _prune_2_4(w: torch.Tensor) -> torch.Tensor:
 
 
 def _to_sparse_pointwise(conv: nn.Conv2d) -> Pointwise2d:
-    """Prune a 1x1 Conv2d to 2:4 and return Pointwise2d with sparse Linear weight.
-
-    cuSPARSELt requires FP16/BF16; weight is cast to FP16 before conversion.
-    Pointwise2d.forward auto-casts the input to match and casts output back,
-    so the rest of the model can stay in FP32.  For best speedup, cast the
-    whole model to FP16 with model.half() before applying sparse.
-    """
     out_ch, in_ch = conv.weight.size(0), conv.weight.size(1)
     w_pruned = _prune_2_4(conv.weight.data.view(out_ch, in_ch)).half()  # FP16 for cuSPARSELt
 
@@ -62,16 +50,8 @@ def apply_sparse_2_4(
     model: nn.Module,
     convert_to_sparse: bool = False,
 ) -> list[str]:
-    """Apply 2:4 magnitude pruning to all 1x1 Conv2d weights.
-
-    convert_to_sparse=True (Ampere+, PyTorch >= 2.1):
-      Replaces expand/project convs in every MBResBlock with Pointwise2d
-      backed by a SparseSemiStructuredTensor weight — this is the only path
-      that triggers cuSPARSELt and yields actual latency speedup.
-
-    convert_to_sparse=False:
-      All 1x1 convs are pruned in-place (stays dense, no speedup).
-    """
+    """Apply 2:4 pruning. convert_to_sparse=True replaces MBResBlock expand/project with
+    Pointwise2d (triggers cuSPARSELt on Ampere+, FP16 only). False = dense, no speedup."""
     pruned: list[str] = []
 
     if convert_to_sparse:
