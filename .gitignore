@@ -119,5 +119,6 @@ data/
 
 runs/
 media/
+profiler_traces/
 
 *.zip
