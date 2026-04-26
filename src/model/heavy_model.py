@@ -25,7 +25,7 @@ class SEBlock(nn.Module):
 
 
 class MBResBlock(nn.Module):
-    """Inverted-residual block: pw-expand → dw-3×3 → pw-project + residual.
+    """Inverted-residual block: pw-expand → dw-3x3 → pw-project + residual.
 
     GroupNorm instead of BatchNorm: safe to remove channels without re-running statistics.
     """
@@ -83,7 +83,7 @@ class _Up(nn.Module):
 
 
 class SRUNetHeavy(nn.Module):
-    """stem → enc×4 → bottleneck (MBResBlock + SE) → dec×4 → head + global residual."""
+    """stem → encx4 → bottleneck (MBResBlock + SE) → decx4 → head + global residual."""
 
     def __init__(
         self,
