@@ -7,16 +7,7 @@ from src.model.heavy_model import MBResBlock
 
 
 def _prune_mbresblock(block: MBResBlock, prune_ratio: float, num_groups: int = 8) -> int:
-    """Physically remove the least-important expand (mid) channels from one MBResBlock.
-
-    Only mid_ch changes — in_ch, out_ch, and skip are untouched, so
-    U-Net skip connections remain valid. New mid_ch is rounded down to the
-    nearest multiple of num_groups (required for GroupNorm).
-
-    Importance score: L1 norm of each output filter of the expand 1x1 conv.
-
-    Returns new mid_ch.
-    """
+    # Only mid_ch shrinks — in_ch, out_ch, skip untouched → U-Net connections stay valid.
     expand_w = block.expand[2].weight.data  # (mid_ch, in_ch, 1, 1)
     mid_ch = expand_w.size(0)
     in_ch = expand_w.size(1)
@@ -30,12 +21,10 @@ def _prune_mbresblock(block: MBResBlock, prune_ratio: float, num_groups: int = 8
     _, keep_idx = torch.topk(importance, k=n_keep)
     keep_idx = keep_idx.sort().values
 
-    # expand: GroupNorm(num_groups, in_ch) is unchanged; only Conv output shrinks
     new_exp_conv = nn.Conv2d(in_ch, n_keep, 1, bias=False)
     new_exp_conv.weight.data = expand_w[keep_idx]
     block.expand[2] = new_exp_conv
 
-    # dw_conv: GroupNorm and depthwise conv both shrink
     old_dw_gn: nn.GroupNorm = block.dw_conv[0]
     new_dw_gn = nn.GroupNorm(num_groups, n_keep)
     new_dw_gn.weight.data = old_dw_gn.weight.data[keep_idx]
@@ -47,7 +36,6 @@ def _prune_mbresblock(block: MBResBlock, prune_ratio: float, num_groups: int = 8
     new_dw_conv.weight.data = old_dw_conv.weight.data[keep_idx]
     block.dw_conv[2] = new_dw_conv
 
-    # project: input channels shrink; GroupNorm(num_groups, out_ch) unchanged
     old_proj_conv: nn.Conv2d = block.project[0]
     new_proj_conv = nn.Conv2d(n_keep, out_ch, 1, bias=False)
     new_proj_conv.weight.data = old_proj_conv.weight.data[:, keep_idx, :, :]
