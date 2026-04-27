@@ -1,4 +1,4 @@
-# Roofline Calculations — UNetSR ×4 on RTX 3060
+# Roofline Calculations — UNetSR x4 on RTX 3060
 
 ---
 
@@ -12,19 +12,19 @@
 | FP16 peak (no tensor cores) | 25.48 TFLOPS |
 | FP16 peak (tensor cores) | 101.90 TFLOPS |
 | Memory bandwidth | 360 GB/s |
-| VRAM | 12 GB GDDR6 (192-bit × 15 Gbps) |
+| VRAM | 12 GB GDDR6 (192-bit x 15 Gbps) |
 
 **Compute peak formulas:**
 
 ```
-FP32 peak  = CUDA_cores × 2 ops/cycle × boost_clock
-           = 3584 × 2 × 1.777 GHz = 12.74 TFLOPS
+FP32 peak  = CUDA_cores x 2 ops/cycle x boost_clock
+           = 3584 x 2 x 1.777 GHz = 12.74 TFLOPS
 
-FP16 peak (no TC) = FP32 peak × 2          = 25.48 TFLOPS
-FP16 peak (TC)    = FP32 peak × 8          = 101.9 TFLOPS  (Ampere tensor core throughput)
+FP16 peak (no TC) = FP32 peak x 2          = 25.48 TFLOPS
+FP16 peak (TC)    = FP32 peak x 8          = 101.9 TFLOPS  (Ampere tensor core throughput)
 
-Memory bandwidth  = bus_width × data_rate
-                  = 192 bit × 15 Gbps / 8 = 360 GB/s
+Memory bandwidth  = bus_width x data_rate
+                  = 192 bit x 15 Gbps / 8 = 360 GB/s
 ```
 
 ---
@@ -34,15 +34,15 @@ Memory bandwidth  = bus_width × data_rate
 For each Conv2d layer with input `(N, C_in, H, W)` and output `(N, C_out, H, W)`:
 
 ```
-MACs  = C_in × K_h × K_w × C_out × H × W    (per sample)
-FLOPs = 2 × MACs                              (1 MAC = 1 multiply + 1 add)
+MACs  = C_in x K_h x K_w x C_out x H x W    (per sample)
+FLOPs = 2 x MACs                              (1 MAC = 1 multiply + 1 add)
 ```
 
-Total for UNetSR ×4 (256×256 LR input, profiled with `thop`):
+Total for UNetSR x4 (256x256 LR input, profiled with `thop`):
 
 ```
 Total MACs  = 403.1 GMACs
-Total FLOPs = 2 × 403.1 = 806.2 GFLOPs
+Total FLOPs = 2 x 403.1 = 806.2 GFLOPs
 Parameters  = 8.23 M  →  32.9 MB (FP32)
 ```
 
@@ -75,8 +75,8 @@ DRAM_FP16 = DRAM_FP32 / 2 = 4446 MB   (2 bytes/elem)
 ```
 AI = FLOPs / DRAM_traffic    [FLOPs/byte]
 
-AI_FP32 = 806.2 × 10^9 / (8892 × 10^6) =  90.7 FLOPs/byte
-AI_FP16 = 806.2 × 10^9 / (4446 × 10^6) = 181.3 FLOPs/byte
+AI_FP32 = 806.2 x 10^9 / (8892 x 10^6) =  90.7 FLOPs/byte
+AI_FP16 = 806.2 x 10^9 / (4446 x 10^6) = 181.3 FLOPs/byte
 ```
 
 ---
@@ -105,15 +105,15 @@ if AI < ridge  →  memory-bound    (bottleneck: DRAM bandwidth)
 The attainable performance at a given AI is bounded by both the compute peak and memory bandwidth:
 
 ```
-ceiling(AI) = min(compute_peak,  mem_bw × AI)    [FLOP/s]
+ceiling(AI) = min(compute_peak,  mem_bw x AI)    [FLOP/s]
 ```
 
 At our AI values:
 
 ```
-FP32,     AI=90.7:  min(12740,  360 × 90.7)  = min(12740, 32652) = 12740 GFLOPs/s
-FP16 noTC, AI=181:  min(25480,  360 × 181.3) = min(25480, 65268) = 25480 GFLOPs/s
-FP16 TC,   AI=181:  min(101900, 360 × 181.3) = min(101900,65268) = 65268 GFLOPs/s
+FP32,     AI=90.7:  min(12740,  360 x 90.7)  = min(12740, 32652) = 12740 GFLOPs/s
+FP16 noTC, AI=181:  min(25480,  360 x 181.3) = min(25480, 65268) = 25480 GFLOPs/s
+FP16 TC,   AI=181:  min(101900, 360 x 181.3) = min(101900,65268) = 65268 GFLOPs/s
 ```
 
 ---
@@ -122,7 +122,7 @@ FP16 TC,   AI=181:  min(101900, 360 × 181.3) = min(101900,65268) = 65268 GFLOPs
 
 ```
 achieved_perf = FLOPs / latency                    [FLOP/s]
-utilisation   = achieved_perf / ceiling(AI)  × 100  [%]
+utilisation   = achieved_perf / ceiling(AI)  x 100  [%]
 ```
 
 | Method | AI | Latency | Achieved | Ceiling | Utilisation |
