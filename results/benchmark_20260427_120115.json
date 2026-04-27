@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "timestamp": "2026-04-27T12:00:58.668068",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 3060",
+    "torch_version": "2.6.0+cu124",
+    "cuda_version": "12.4",
+    "cudnn_version": "90100",
+    "platform": "Linux-6.17.0-22-generic-x86_64-with-glibc2.39",
+    "scale": 4,
+    "input_size": 256,
+    "base_channels": 64,
+    "batch_size": 1,
+    "warmup": 10,
+    "steps": 50,
+    "checkpoint": "../heavy_srunet_29M.pt"
+  },
+  "results": [
+    {
+      "label": "Eager FP32 (CUDA)",
+      "latency_mean_ms": 92.09760307312011,
+      "latency_std_ms": 16.477623203101437,
+      "latency_p50_ms": 100.92649459838867,
+      "latency_p95_ms": 103.19861145019532,
+      "throughput_img_s": 10.858045884278425,
+      "peak_mem_mb": 887.0
+    },
+    {
+      "label": "ORT CUDA EP",
+      "latency_mean_ms": 85.62922702054493,
+      "latency_std_ms": 17.793783008095446,
+      "latency_p50_ms": 94.16747200884856,
+      "latency_p95_ms": 96.21999834780581,
+      "throughput_img_s": 11.67825560027619,
+      "peak_mem_mb": 9.3
+    }
+  ]
+}

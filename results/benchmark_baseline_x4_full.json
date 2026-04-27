@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "timestamp": "2026-04-27T13:41:19.610476",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 3060",
+    "torch_version": "2.6.0+cu124",
+    "cuda_version": "12.4",
+    "cudnn_version": "90100",
+    "platform": "Linux-6.17.0-22-generic-x86_64-with-glibc2.39",
+    "scale": 4,
+    "input_size": 256,
+    "base_channels": 64,
+    "batch_size": 1,
+    "warmup": 10,
+    "steps": 50,
+    "checkpoint": "../unet_sr_x4_baseline.pt"
+  },
+  "results": [
+    {
+      "label": "Eager FP32 (CUDA)",
+      "latency_mean_ms": 119.71943664550781,
+      "latency_std_ms": 0.1282748525400198,
+      "latency_p50_ms": 119.75196838378906,
+      "latency_p95_ms": 119.81255340576172,
+      "throughput_img_s": 8.352862559494199,
+      "peak_mem_mb": 1490.2
+    },
+    {
+      "label": "Eager FP16 (CUDA)",
+      "latency_mean_ms": 76.10981552124024,
+      "latency_std_ms": 0.020035591127485618,
+      "latency_p50_ms": 76.10334396362305,
+      "latency_p95_ms": 76.14311370849609,
+      "throughput_img_s": 13.13890978649037,
+      "peak_mem_mb": 879.7
+    },
+    {
+      "label": "torch.compile [default] (CUDA)",
+      "latency_mean_ms": 109.71338272094727,
+      "latency_std_ms": 0.19970441815507606,
+      "latency_p50_ms": 109.75556564331055,
+      "latency_p95_ms": 110.0301700592041,
+      "throughput_img_s": 9.114658350690638,
+      "peak_mem_mb": 1122.0
+    },
+    {
+      "label": "torch.compile [reduce-overhead] (CUDA)",
+      "latency_mean_ms": 109.42970703125,
+      "latency_std_ms": 0.09170022971486681,
+      "latency_p50_ms": 109.42683029174805,
+      "latency_p95_ms": 109.52681846618653,
+      "throughput_img_s": 9.138286367836372,
+      "peak_mem_mb": 1110.3
+    },
+    {
+      "label": "torch.compile [max-autotune] (CUDA)",
+      "latency_mean_ms": 109.19891948699951,
+      "latency_std_ms": 0.07447948363737003,
+      "latency_p50_ms": 109.17972946166992,
+      "latency_p95_ms": 109.25402374267578,
+      "throughput_img_s": 9.157599770197848,
+      "peak_mem_mb": 1110.3
+    },
+    {
+      "label": "ORT CUDA EP",
+      "latency_mean_ms": 120.33913120161742,
+      "latency_std_ms": 0.3723392393905804,
+      "latency_p50_ms": 120.2570229943376,
+      "latency_p95_ms": 120.5172973437584,
+      "throughput_img_s": 8.309848924574581,
+      "peak_mem_mb": 0.8
+    },
+    {
+      "label": "ORT Tensorrt EP",
+      "latency_mean_ms": 90.64231027849019,
+      "latency_std_ms": 0.24456142942004416,
+      "latency_p50_ms": 90.61517000372987,
+      "latency_p95_ms": 91.07810358109418,
+      "throughput_img_s": 11.032375464919106,
+      "peak_mem_mb": 0.8
+    },
+    {
+      "label": "ORT Tensorrt EP",
+      "latency_mean_ms": 30.841937640798278,
+      "latency_std_ms": 0.4075819985082638,
+      "latency_p50_ms": 30.749750992981717,
+      "latency_p95_ms": 31.05100870889146,
+      "throughput_img_s": 32.42338440750823,
+      "peak_mem_mb": 0.8
+    }
+  ]
+}
