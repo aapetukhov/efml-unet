@@ -18,6 +18,9 @@
 | ORT CUDA EP | FP32 | 130 ms | 143 ms | 7.7 img/s | 23.497 | 0.6918 | ×0.97 |
 | ORT TensorRT EP | FP32 | 97 ms | 100 ms | 10.3 img/s | 23.497 | 0.6918 | ×1.40 |
 | **ORT TensorRT EP** | **FP16** | **34 ms** | **35 ms** | **29.7 img/s** | **23.497** | **0.6918** | **×4.02** |
+| TVM (DLight, no tuning) | FP32 | 511 ms | 516 ms | 2.0 img/s | 23.497 | 0.6918 | ×0.24 |
+| TVM MetaSchedule (512 trials, 37.5 min) | FP32 | 205 ms | 208 ms | 4.9 img/s | 23.497 | 0.6918 | ×0.61 |
+| TVM MetaSchedule (1024 trials, 72 min) | FP32 | 152 ms | 153 ms | 6.6 img/s | 23.497 | 0.6918 | ×0.83 |
 
 ---
 
@@ -77,3 +80,5 @@
 - TensorRT FP32 даёт **×1.4** за счёт layer fusion и autotuning cuDNN
 - TensorRT FP16 даёт **×4** — tensor cores + fusion + вдвое меньше DRAM трафика
 - Батчинг при любом методе даёт **≤+20%** throughput — GPU уже насыщен на BS=1 при 1024×1024 HR
+- TVM DLight (без tuning) **в 4× медленнее** eager — DLight Fallback не может конкурировать с cuDNN для 3×3 conv
+- TVM MetaSchedule: каждое удвоение trials даёт ~25% ускорение (512→205 ms, 1024→152 ms); 1024 trials ≈ **×0.83** от PyTorch — близко, но ещё не обгоняет cuDNN

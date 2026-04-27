@@ -270,7 +270,10 @@ def run_ort(onnx_path: Path, loader, device, provider: str,
     opts = ort.SessionOptions()
     opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
     sess = ort.InferenceSession(str(onnx_path), opts, providers=providers)
-    active = sess.get_providers()[0].replace("ExecutionProvider", " EP")
+    active_provider = sess.get_providers()[0]
+    if active_provider != provider:
+        raise RuntimeError(f"{provider} unavailable, fell back to {active_provider}")
+    active = active_provider.replace("ExecutionProvider", " EP")
 
     latencies, psnrs, ssims = [], [], []
     measured = 0
@@ -470,11 +473,27 @@ def main() -> None:
     print(f"Scale      : {args.scale}x  |  Input: {args.input_size}²  |  base_ch: {args.base_channels}")
     print(f"Warmup     : {args.warmup}  |  Measure: {args.steps}  |  BS: {args.batch_size}")
 
-    # Build model
-    model = build_model(args.in_channels, args.out_channels, args.base_channels, args.scale)
-    ckpt  = torch.load(args.checkpoint, map_location="cpu")
-    state = ckpt.get("model_state_dict", ckpt)
-    model.load_state_dict(state)
+    # Build model — auto-detect heavy checkpoint by presence of embedded config
+    ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
+    embedded_cfg = ckpt.get("config") if isinstance(ckpt, dict) else None
+    is_heavy = (
+        embedded_cfg is not None and
+        "SRUNetHeavy" in str(embedded_cfg.get("model", {}).get("_target_", ""))
+    )
+    if is_heavy:
+        from src.heavy_modeling import load_heavy_model
+        model = load_heavy_model(args.checkpoint)
+        cfg_model = embedded_cfg["model"]
+        args.in_channels   = cfg_model.get("in_channels", 3)
+        args.out_channels  = cfg_model.get("out_channels", 3)
+        args.base_channels = cfg_model.get("base_channels", 96)
+        args.scale         = embedded_cfg.get("datasets", {}).get("scale", args.scale)
+        print(f"Model      : SRUNetHeavy (base_ch={args.base_channels}, "
+              f"{sum(p.numel() for p in model.parameters()):,} params)")
+    else:
+        model = build_model(args.in_channels, args.out_channels, args.base_channels, args.scale)
+        state = ckpt.get("model_state_dict", ckpt)
+        model.load_state_dict(state)
     model.eval()
 
     # ONNX path keyed by architecture so stale exports are never reused
