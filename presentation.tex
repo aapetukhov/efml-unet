@@ -97,7 +97,7 @@
   \vspace{0.9cm}
   \begin{center}
     {\Large\bfseries\color{white} Ускорение инференса UNet}\\[0.3em]
-    {\large\color{white!90} для задачи Super-Resolution~\texttimes 4}\\[0.9em]
+    {\large\color{white!90} для задачи Super-Resolution~x 4}\\[0.9em]
     {\normalsize\color{white!75} Efficient ML — Team 52}\\[0.65em]
     \color{white!50}\rule{0.38\textwidth}{0.4pt}\\[0.5em]
     {\small\color{white!80}%
@@ -109,18 +109,18 @@
 % ============================================================
 % SLIDE 2 — Pipeline Demo
 % ============================================================
-\begin{frame}{Задача: Super-Resolution~\texttimes 4}
+\begin{frame}{Задача: Super-Resolution~x 4}
   \begin{columns}[c]
     \begin{column}{0.58\textwidth}
       \includegraphics[width=\linewidth]{demo/lr_vs_sr_penguin_head.png}
       \begin{center}
-        {\small LR вход (180\texttimes 140~px) \hfill SR выход (720\texttimes 560~px)}
+        {\small LR вход (180x 140~px) \hfill SR выход (720x 560~px)}
       \end{center}
     \end{column}
     \begin{column}{0.38\textwidth}
       \begin{block}{Что делает модель}
-        По Low-Resolution входу восстанавливает детали — масштаб \texttimes 4\\[0.3em]
-        LR 256\texttimes 256 → SR 256\texttimes 256\\
+        По Low-Resolution входу восстанавливает детали — масштаб x 4\\[0.3em]
+        LR 256x 256 → SR 256x 256\\
         {\footnotesize (вычисления на LR-разрешении)}
       \end{block}
       \vspace{0.4em}
@@ -131,7 +131,7 @@
           Val   &  50 изображений \\
           Test  &  50 изображений \\
         \end{tabular}\\[0.2em]
-        LR on-the-fly: bicubic \,{\small ↓\texttimes 4 → ↑\texttimes 4}
+
       \end{block}
     \end{column}
   \end{columns}
@@ -147,8 +147,7 @@
         \begin{itemize}
           \item U-Net, 5 уровней энкодер/декодер
           \item \textbf{MBResBlock} (inverted residual):\\
-                \footnotesize Conv1\texttimes 1 → DWConv3\texttimes 3 → Conv1\texttimes 1
-          \item \textbf{SEBlock} в боттлнеке
+                \footnotesize Conv1x 1 → DWConv3x 3 → Conv1x 1
           \item Глобальный residual
           \item \textbf{GroupNorm} — каналы можно удалять без пересчёта статистик
         \end{itemize}
@@ -161,9 +160,9 @@
         \begin{tabular}{@{}ll@{}}
           Параметры  & \textbf{29.3M} \\
           FLOPs      & 138 GFLOPs \\
-          Вход/выход & 256\texttimes 256 → 256\texttimes 256 \\
+          Вход/выход & 256x 256 → 256x 256 \\
           Метрика    & SSIM (FP32 ref = \textbf{0.7689}) \\
-          Бенчмарк   & CUDA Events, BS=1 \\
+          Бенчмарк   & CUDA Events\\
         \end{tabular}
       \end{alertblock}
       \vspace{0.4em}
@@ -186,30 +185,30 @@
     \toprule
     \textbf{Метод} & \textbf{Precision} & \textbf{Speedup} & \textbf{SSIM} & \textbf{GPU} \\
     \midrule
-    Eager baseline      & FP32      & 1.00\texttimes & 0.769 & RTX 3060 \\
-    Eager baseline      & FP16      & 1.52\texttimes & 0.769 & RTX 3060 \\
-    torch.compile       & FP32      & 1.03\texttimes & 0.769 & RTX 3060 \\
-    ORT TensorRT EP     & FP32      & 1.61\texttimes & 0.769 & RTX 3060 \\
+    Eager baseline      & FP32      & 1.00x & 0.769 & RTX 3060 \\
+    Eager baseline      & FP16      & 1.52x & 0.769 & RTX 3060 \\
+    torch.compile       & FP32      & 1.03x & 0.769 & RTX 3060 \\
+    ORT TensorRT EP     & FP32      & 1.61x & 0.769 & RTX 3060 \\
     \hlrow
-    \textbf{ORT TRT EP}   & \textbf{FP16} & \textbf{3.62\texttimes} & \textbf{0.769} & RTX 3060 \\
+    \textbf{ORT TRT EP}   & \textbf{FP16} & \textbf{3.62x} & \textbf{0.769} & RTX 3060 \\
     \hlyrow
-    \textbf{LSQ PTQ + FP16} & INT8/FP16 & $\approx$1.0\texttimes\,$^*$ & 0.768 & A100 \\
-    Struct. pruning 25\% & FP32   & 1.23\texttimes & 0.760 & RTX 8000 \\
-    Struct. pruning 50\% & FP32   & 1.57\texttimes & 0.758 & RTX 8000 \\
+    \textbf{LSQ PTQ + FP16} & INT8/FP16 & $\approx$1.0x\,$^*$ & 0.768 & A100 \\
+    Struct. pruning 25\% & FP32   & 1.23x & 0.760 & RTX 8000 \\
+    Struct. pruning 50\% & FP32   & 1.57x & 0.758 & RTX 8000 \\
     \hlrow
-    \textbf{Struct. pruning 75\%} & \textbf{FP32} & \textbf{2.27\texttimes} & \textbf{0.760} & RTX 8000 \\
-    2:4 sparsity (FP16) & FP16      & 0.84\texttimes & — & A100 \\
+    \textbf{Struct. pruning 75\%} & \textbf{FP32} & \textbf{2.27x} & \textbf{0.760} & RTX 8000 \\
+    2:4 sparsity (FP16) & FP16      & 0.84x & 0.75 & A100 \\
     \bottomrule
   \end{tabular}
   \end{center}
   \vspace{0.15em}
-  {\footnotesize $^*$ LSQ PTQ: главный выигрыш — сжатие модели в \textbf{4\texttimes} (112~MB~→~28~MB)}
+  {\footnotesize $^*$ LSQ PTQ: главный выигрыш — сжатие модели в \textbf{4x} (112~MB~→~28~MB)}
 \end{frame}
 
 % ============================================================
-% SLIDE 5 — Артём: LSQ PTQ — Method
+% SLIDE 5 — LSQ PTQ — Method
 % ============================================================
-\begin{frame}{Артём: Квантизация LSQ — метод}
+\begin{frame}{Квантизация LSQ — метод}
   \begin{columns}[T]
     \begin{column}{0.52\textwidth}
       \begin{block}{LSQ: Learned Step Size Quantization}
@@ -218,15 +217,12 @@
         \hspace{2em}$\hat{w} = \mathrm{round}(w\,/\,s)\cdot s$\\[0.4em]
         \begin{itemize}
           \item $s$ — learnable per-channel step size
-          \item Градиент через \texttt{round}: STE
-          \item \textbf{PTQ:} $s$ из статистик весов, finetune не нужен
+          % \item Градиент через \texttt{round}: STE
+          % \item \textbf{PTQ:} $s$ из статистик весов, finetune не нужен
         \end{itemize}
       \end{block}
       \vspace{0.4em}
       \footnotesize\vspace{0.3em}
-      \texttt{LsqConv2d/LsqLinear} — drop-in замена\\[0.1em]
-      \texttt{apply\_lsq\_ptq()} — калибровка на val\\[0.1em]
-      \texttt{finalize\_lsq()} — экспорт INT8 + FP16 scales
     \end{column}
     \begin{column}{0.44\textwidth}
       \begin{alertblock}{Сжатие модели}
@@ -241,19 +237,19 @@
           \textbf{LSQ INT8} & \textbf{28.1~MB} & \textbf{0.7680} \\
           \bottomrule
         \end{tabular}\\[0.3em]
-        \textbf{4\texttimes} меньше FP32\\[0.1em]
+        \textbf{4x} меньше FP32\\[0.1em]
         SSIM $\Delta = {-}0.0009$ (без finetune)\\[0.2em]
-        {\footnotesize INT8 state dict: веса в \texttt{int8} + FP16 scales}
+        % {\footnotesize INT8 state dict: веса в \texttt{int8} + FP16 scales}
       \end{alertblock}
     \end{column}
   \end{columns}
 \end{frame}
 
 % ============================================================
-% SLIDE 6 — Артём: LSQ PTQ — Results
+% SLIDE 6 — LSQ PTQ — Results
 % ============================================================
-\begin{frame}[shrink=10]{Артём: Квантизация LSQ — результаты}
-  \framesubtitle{NVIDIA A100-SXM4-80GB · 256\texttimes 256 · 100 runs}
+\begin{frame}[shrink=10]{Квантизация LSQ — результаты}
+  \framesubtitle{NVIDIA A100-SXM4-80GB · 256x 256 · 100 runs}
   \begin{columns}[T]
     \begin{column}{0.54\textwidth}
       \small
@@ -283,10 +279,10 @@
     \begin{column}{0.42\textwidth}
       \begin{block}{Выводы}
         \begin{itemize}
-          \item LSQ+FP16 при BS=64 → \textbf{0.97\texttimes} vs FP16
-          \item Fake quant не ускоряет:\\
-                вычисления в float
-          \item Выигрыш: \textbf{хранение} (4\texttimes)
+          \item LSQ+FP16 при BS=64 → \textbf{0.97x} vs FP16
+          % \item Fake quant не ускоряет:\\
+          %       вычисления в float
+          \item Выигрыш: \textbf{хранение} (4x)
           \item Для speedup нужны INT8-ядра\\
                 \footnotesize{(TRT INT8, torch.ao)}
         \end{itemize}
@@ -294,146 +290,109 @@
     \end{column}
   \end{columns}
 \end{frame}
-
 % ============================================================
-% SLIDE 7 — Женя: Baseline & torch.compile
+% SLIDE — Женя: Компиляция и inference-бэкенды
 % ============================================================
-\begin{frame}{Женя: Baseline и компиляция}
-  \framesubtitle{SRUNetHeavy 29M · RTX 3060 · BS=1 · 50 runs}
+\begin{frame}{Компиляция}
   \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \small
-      \renewcommand{\arraystretch}{1.2}
+    \begin{column}{0.52\textwidth}
+      \footnotesize\renewcommand{\arraystretch}{1.18}
       \begin{tabular}{@{}llrr@{}}
         \toprule
         \textbf{Метод} & \textbf{Prec.} & \textbf{Latency} & \textbf{Speedup} \\
         \midrule
-        Eager PyTorch       & FP32 & 48.1 ms & 1.00\texttimes \\
-        Eager PyTorch       & FP16 & 31.7 ms & 1.52\texttimes \\
-        \midrule
-        torch.compile       & FP32 & 46.6 ms & 1.03\texttimes \\
-        ORT CUDA EP         & FP32 & 46.1 ms & 1.04\texttimes \\
-        \hlrow
-        ORT TRT EP          & FP32 & 29.8 ms & 1.61\texttimes \\
-        \hlrow
-        \textbf{ORT TRT EP} & \textbf{FP16} & \textbf{13.3 ms} & \textbf{3.62\texttimes} \\
+        Eager PyTorch       & FP32 & 48.1 ms & 1.00x \\
+        Eager PyTorch       & FP16 & 31.7 ms & 1.52x \\
+        torch.compile       & FP32 & 46.6 ms & 1.03x \\
+        ORT CUDA EP         & FP32 & 46.1 ms & 1.04x \\
+        \rowcolor{hlyellow}
+        ORT TRT EP          & FP32 & 29.8 ms & 1.61x \\
+        \rowcolor{hlgreen}
+        \textbf{ORT TRT EP} & \textbf{FP16} & \textbf{13.3 ms} & \textbf{3.62x} \\
         \bottomrule
       \end{tabular}
       \vspace{0.3em}\\
-      {\footnotesize Throughput TRT FP16: \textbf{75.2 img/s} vs 20.8 img/s (Eager FP32)}
+      {\scriptsize SRUNetHeavy · RTX 3060}
     \end{column}
-    \begin{column}{0.46\textwidth}
-      \begin{block}{torch.compile — почему мало?}
-        \small
-        Triton не находит fusion для\\
-        \texttt{GroupNorm + GELU + DWConv3\texttimes 3}\\[0.25em]
-        TensorRT кодирует их custom plugins\\
-        → kernel launch overhead ↓↓
-      \end{block}
-      \vspace{0.2em}
-      \begin{alertblock}{TRT FP16 — откуда 3.62\texttimes?}
-        \small
-        \begin{itemize}
-          \item 1\texttimes 1 Conv = GEMM → Tensor Cores
-          \item Fusion GroupNorm+GELU+Conv
-          \item Вдвое меньше DRAM-трафика
+    \begin{column}{0.44\textwidth}
+      \begin{alertblock}{TRT FP16: почему 3.62x?}
+        \scriptsize
+        \begin{itemize}\setlength{\itemsep}{1pt}
+          \item \textbf{Fusion}: TRT склеивает несколько операций в один kernel.
+          \item \textbf{FP16}: вдвое меньше байт на каждое чтение/запись
         \end{itemize}
       \end{alertblock}
+      \vspace{0.2em}
+      \begin{block}{TVM MetaSchedule (UNetSR)}
+        \scriptsize
+        Автотюнинг CUDA-тайлингов без cuDNN.\\[0.2em]
+        \renewcommand{\arraystretch}{1.1}
+        \begin{tabular}{@{}lrr@{}}
+          \toprule
+          time spent & Latency & Speedup \\
+          \midrule
+          (default)  & 511 ms & 0.23x \\
+          3 hours & 136 ms & 0.88x \\
+          \bottomrule
+        \end{tabular}
+        \vspace{0.2em}\\
+        Близко к cuDNN, но не обгоняет.
+      \end{block}
     \end{column}
   \end{columns}
 \end{frame}
 
 % ============================================================
-% SLIDE 8 — Женя: TensorRT vs UNetSR
+% SLIDE — Женя: Bandwidth-анализ
 % ============================================================
-\begin{frame}{Женя: TensorRT — сравнение моделей}
+\begin{frame}{Компиляция}
+  % \framesubtitle{SRUNetHeavy · RTX 3060 (360 GB/s DRAM, 3 MB L2)}
   \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \footnotesize\renewcommand{\arraystretch}{1.15}
-      \begin{tabular}{@{}llrr@{}}
-        \toprule
-        \textbf{Модель} & \textbf{Метод} & \textbf{Latency} & \textbf{Speedup} \\
-        \midrule
-        \multirow{3}{*}{SRUNetHeavy}
-          & Eager FP32    & 48.1 ms  & 1.00\texttimes \\
-          & TRT FP32      & 29.8 ms  & 1.61\texttimes \\
-          & \textbf{TRT FP16} & \textbf{13.3 ms} & \textbf{3.62\texttimes} \\
-        \midrule
-        \multirow{3}{*}{UNetSR}
-          & Eager FP32    & 119.7 ms & 1.00\texttimes \\
-          & TRT FP32      &  90.6 ms & 1.32\texttimes \\
-          & \textbf{TRT FP16} & \textbf{30.8 ms} & \textbf{3.87\texttimes} \\
-        \bottomrule
-      \end{tabular}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Arithmetic Intensity}
+        \scriptsize\renewcommand{\arraystretch}{1.12}
+        \begin{tabular}{@{}lrrl@{}}
+          \toprule
+          & AI (FL/B) & Ridge & Режим \\
+          \midrule
+          FP32      & 24  & 35.4 & \textbf{mem-bound} \\
+          FP16      & 48  & 70.8 & \textbf{mem-bound} \\
+          \bottomrule
+        \end{tabular}
+      \end{block}
+      
     \end{column}
-    \begin{column}{0.46\textwidth}
-      \begin{alertblock}{Почему SRUNetHeavy лучше реагирует на TRT FP32?}
-        \small
-        ×1.61 vs ×1.32 у UNetSR\\[0.2em]
-        MBResBlock: больше 1×1 conv относительно DWConv → fusion GroupNorm+GELU+Conv1×1 важнее
-      \end{alertblock}
-      \vspace{0.3em}
-      \begin{exampleblock}{Ограничение DWConv}
-        \small
-        DWConv3×3 \textbf{не использует Tensor Cores}\\
-        (TC нужны матрицы ≥16×16)\\[0.15em]
-        FP16 ускоряется за счёт bandwidth, а не вычислений
+    \begin{column}{0.48\textwidth}
+      \begin{exampleblock}{Утилизация bandwidth}
+        \scriptsize\renewcommand{\arraystretch}{1.15}
+        \begin{tabular}{@{}lr@{}}
+          \toprule
+          \textbf{Метод} & \textbf{\% от BW ceiling} \\
+          \midrule
+          Eager FP32  & 33\% \\
+          TRT FP32    & 54\% \\
+          TRT FP16    & \textbf{60\%} \\
+          \bottomrule
+        \end{tabular}
+        \vspace{0.3em}\\
+        Потолок: 360 GB/s $\times$ AI
       \end{exampleblock}
     \end{column}
   \end{columns}
 \end{frame}
 
 % ============================================================
-% SLIDE 9 — Женя: Roofline Analysis
+% SLIDE 10 — Structural Pruning — Idea
 % ============================================================
-\begin{frame}{Женя: Roofline-анализ}
-  \framesubtitle{SRUNetHeavy · RTX 3060}
-  \begin{columns}[c]
-    \begin{column}{0.56\textwidth}
-      \includegraphics[width=\linewidth]{zhenya-results/roofline_rtx3060.png}
-    \end{column}
-    \begin{column}{0.40\textwidth}
-      \small
-      \begin{block}{Arithmetic Intensity}
-        \renewcommand{\arraystretch}{1.1}
-        \begin{tabular}{@{}lrl@{}}
-          \toprule
-           & AI & режим \\
-          \midrule
-          FP32 ridge  & 35   & — \\
-          FP16 TC ridge & 283 & — \\
-          \midrule
-          AI FP32  & 210 & compute-bound \\
-          AI FP16  & 420 & compute-bound \\
-          \bottomrule
-        \end{tabular}
-      \end{block}
-      \vspace{0.35em}
-      \textbf{Почему лишь 22\% от пика?}\\[0.1em]
-      DWConv3\texttimes 3 — каналы независимо, warp occupancy низкий
-      \vspace{0.2em}
-      \begin{alertblock}{}
-        \footnotesize
-        Eager FP32: 22\% пика\\
-        TRT FP32:\phantom{x} 36\% пика\\
-        TRT FP16:\phantom{x} 10\% TC-пика
-      \end{alertblock}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-% ============================================================
-% SLIDE 10 — Андрей: Structural Pruning — Idea
-% ============================================================
-\begin{frame}[shrink=10]{Андрей: Структурное прунирование — идея}
+\begin{frame}[shrink=10]{Прунинг}
   \begin{columns}[T]
     \begin{column}{0.50\textwidth}
-      \begin{block}{Expand-Channel Pruning}
-        В каждом MBResBlock физически удаляем каналы expand 1\texttimes 1 conv с наименьшей L1-нормой\\[0.2em]
-        \textbf{U-Net топология не нарушается:} только \texttt{mid\_ch} уменьшается
+      \begin{block}{Channel Pruning}
+        В каждом MBResBlock физически удаляем каналы 1x1 свёртки с наименьшей L1-нормой\\[0.2em]
+        Архитектура не нарушается, только кол-во промежуточных каналов уменьшается
       \end{block}
       \vspace{0.2em}
-      \begin{exampleblock}{Почему даёт реальный speedup}
+      \begin{exampleblock}{Почему даёт ускорение}
         \begin{itemize}
           \item Тензоры меньше физически — не нужны sparse kernels
           \item GroupNorm — каналы удаляются без пересчёта
@@ -449,21 +408,21 @@
           & До & После \\
           \midrule
           Параметры & 29.3M & \textbf{8.4M} \\
-          Latency BS=1 & 34.2 ms & \textbf{15.1 ms} \\
-          Speedup BS=1 & — & \textbf{2.27\texttimes} \\
+          Latency & 34.2 ms & \textbf{15.1 ms} \\
+          Speedup & — & \textbf{2.27x} \\
           SSIM & 0.7689 & 0.7598 \\
           \bottomrule
         \end{tabular}\\[0.15em]
-        Модель в \textbf{3.5\texttimes} меньше · SSIM \textbf{−0.009}
+        Модель в \textbf{3.5x} меньше · SSIM \textbf{−0.009}
       \end{alertblock}
     \end{column}
   \end{columns}
 \end{frame}
 
 % ============================================================
-% SLIDE 11 — Андрей: Structural Pruning — Plots
+% SLIDE 11 — Structural Pruning — Plots
 % ============================================================
-\begin{frame}{Андрей: Структурное прунирование — результаты}
+\begin{frame}{Прунинг - результаты}
   \begin{center}
     \includegraphics[width=0.90\linewidth]{plots/andrey/structural_pruning.png}
   \end{center}
@@ -472,21 +431,21 @@
     \footnotesize\renewcommand{\arraystretch}{1.1}
     \begin{tabular}{@{}lrrrr@{}}
       \toprule
-      \textbf{Прунирование} & \textbf{Speedup BS=1} & \textbf{Speedup BS=32} & \textbf{SSIM (ft)} & \textbf{Params} \\
+      \textbf{Прунинг} & \textbf{Speedup BS=1} & \textbf{Speedup BS=32} & \textbf{SSIM (ft)} & \textbf{Params} \\
       \midrule
-      25\% + finetune & 1.23\texttimes & 1.23\texttimes & 0.760 & 22.3M \\
-      50\% + finetune & 1.57\texttimes & 1.68\texttimes & 0.758 & 15.4M \\
+      25\% + finetune & 1.23x & 1.23x & 0.760 & 22.3M \\
+      50\% + finetune & 1.57x & 1.68x & 0.758 & 15.4M \\
       \hlrow
-      \textbf{75\% + finetune} & \textbf{2.27\texttimes} & \textbf{2.53\texttimes} & \textbf{0.760} & \textbf{8.4M} \\
+      \textbf{75\% + finetune} & \textbf{2.27x} & \textbf{2.53x} & \textbf{0.760} & \textbf{8.4M} \\
       \bottomrule
     \end{tabular}
   \end{center}
 \end{frame}
 
 % ============================================================
-% SLIDE 12 — Андрей: Magnitude Pruning
+% SLIDE 12 — Magnitude Pruning
 % ============================================================
-\begin{frame}{Андрей: Magnitude Pruning}
+\begin{frame}{Magnitude Pruning}
   \begin{columns}[c]
     \begin{column}{0.62\textwidth}
       \includegraphics[width=\linewidth]{plots/andrey/magnitude_pruning.png}
@@ -494,12 +453,12 @@
     \begin{column}{0.34\textwidth}
       \begin{block}{Метод}
         \small
-        Обнуляем N\% наименьших весов 1\texttimes 1 Conv2d через \texttt{global\_unstructured}
+        Обнуляем N\% наименьших весов 1x 1 свёрток
       \end{block}
       \vspace{0.3em}
-      \begin{alertblock}{Speedup ≈ 1.0\texttimes}
+      \begin{alertblock}{Ускорения примерно нет}
         \small
-        Тензоры остаются \textbf{dense} — GPU исполняет те же CUDA-ядра с теми же матрицами\\[0.15em]
+        Тензоры остаются плотными — GPU исполняет те же CUDA-ядра с теми же матрицами\\[0.15em]
         Нули перемножаются, а не пропускаются
       \end{alertblock}
     \end{column}
@@ -507,9 +466,9 @@
 \end{frame}
 
 % ============================================================
-% SLIDE 13 — Андрей: 2:4 Semi-structured Sparsity
+% SLIDE 13 — 2:4 Semi-structured Sparsity
 % ============================================================
-\begin{frame}[shrink=10]{Андрей: 2:4 Semi-structured Sparsity}
+\begin{frame}[shrink=10]{2:4 Semi-structured Sparsity}
   \begin{columns}[c]
     \begin{column}{0.60\textwidth}
       \includegraphics[width=\linewidth]{plots/andrey/sparse_244.png}
@@ -518,15 +477,14 @@
       \begin{block}{Метод}
         \small
         В каждой группе из 4 весов ровно 2 обнуляются (по наименьшей норме).\\[0.2em]
-        \texttt{to\_sparse\_semi\_structured} + cuSPARSELt
       \end{block}
       \vspace{0.35em}
-      \begin{alertblock}{Почему нет speedup}
+      \begin{alertblock}{Почему нет ускорения}
         \small
         \begin{itemize}
-          \item cuSPARSELt — только \textbf{Ampere (sm\_80+)}, RTX~8000 = Turing
-          \item На A100: матрицы 1\texttimes 1 Conv слишком малы — overhead перевешивает
-          \item BS=1: \textbf{0.84\texttimes}, BS=32: \textbf{0.38\texttimes}
+          \item Нужен сильно больше батчсайз + конвертировать свёртку в линейный слой
+          \item На A100: матрицы 1x 1 свёрток слишком малы, чтобы увидеть ускорение
+          \item BS=1: \textbf{0.84x}, BS=32: \textbf{0.38x}
         \end{itemize}
       \end{alertblock}
     \end{column}
@@ -534,9 +492,9 @@
 \end{frame}
 
 % ============================================================
-% SLIDE 14 — Андрей: Group Conv
+% SLIDE 14 — Group Conv
 % ============================================================
-\begin{frame}{Андрей: Grouped Convolutions}
+\begin{frame}{Grouped Convolutions}
   \begin{columns}[c]
     \begin{column}{0.58\textwidth}
       \includegraphics[width=\linewidth]{plots/andrey/group_conv.png}
@@ -544,15 +502,15 @@
     \begin{column}{0.38\textwidth}
       \begin{block}{Метод}
         \small
-        expand/project 1\texttimes 1 Conv → grouped conv (G=2 или G=4).\\[0.2em]
-        FLOPs \(\div\) G, но CUDA matmul overhead ограничивает реальный speedup.
+        expand/project 1x 1 Conv → grouped conv (G=2 или G=4).\\[0.2em]
+        GFLOPs, но CUDA matmul overhead ограничивает реальный speedup.
       \end{block}
       \vspace{0.4em}
       \begin{exampleblock}{Сравнение}
         \small
-        G=4 both: \textbf{1.13\texttimes}, SSIM \({-}0.035\)\\[0.15em]
-        Struct. 75\%: \textbf{2.27\texttimes}, SSIM \({-}0.009\)\\[0.3em]
-        → Структурное прунирование превосходит по обеим метрикам
+        G=4 both: \textbf{1.13x}, SSIM \({-}0.035\)\\[0.15em]
+        Struct. 75\%: \textbf{2.27x}, SSIM \({-}0.009\)\\[0.3em]
+        → Структурированный прунинг превосходит по обеим метрикам
       \end{exampleblock}
     \end{column}
   \end{columns}
@@ -570,10 +528,10 @@
           \toprule
           \textbf{Цель} & \textbf{Метод} & \textbf{Итог} \\
           \midrule
-          Макс. ускорение    & TRT FP16      & \textbf{3.62\texttimes} \\
+          Макс. ускорение    & TRT FP16      & \textbf{3.62x} \\
           Без потерь SSIM    & TRT FP16      & SSIM = 0.769 \\
-          Сжатие модели      & LSQ PTQ       & \textbf{4\texttimes} \\
-          Speed+компактность & Struct. 75\%  & \textbf{2.27\texttimes} \\
+          Сжатие модели      & LSQ PTQ       & \textbf{4x} \\
+          Speed+компактность & Struct. 75\%  & \textbf{2.27x} \\
           \bottomrule
         \end{tabular}
       \end{alertblock}
@@ -588,7 +546,7 @@
         \begin{itemize}
           \item \textbf{torch.compile} — минимальный выигрыш:\\Triton не фьюзит GroupNorm+GELU+DWConv
           \item \textbf{TensorRT} — лучший бэкенд: fusion + Tensor Cores
-          \item \textbf{LSQ PTQ} — 4\texttimes меньше, но без INT8-ядер не ускоряет
+          \item \textbf{LSQ PTQ} — 4x меньше, но без INT8-ядер не ускоряет
           \item \textbf{Struct. pruning} — лучший трейдофф, любой GPU
           \item \textbf{2:4 sparsity} — нужен Ampere+, малые матрицы убыточны
         \end{itemize}
