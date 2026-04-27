@@ -119,6 +119,5 @@ data/
 
 inference_examples/
 *.zip
-*.json
 runs/
-results/demo
+profiler_traces/
