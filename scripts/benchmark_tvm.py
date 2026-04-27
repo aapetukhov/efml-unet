@@ -1,12 +1,15 @@
 """
-Benchmark UNetSR x4 via Apache TVM (Relax frontend, CPU/LLVM, no autotuning).
+Benchmark UNetSR x4 via Apache TVM (Relax ONNX frontend, CUDA).
 
-TVM 0.24+ uses `relax` (the relay API was removed).  The model is converted
-via torch.export -> tvm.relax.frontend.torch.from_exported_program, compiled
-with the default LLVM pipeline and run through VirtualMachine.
+Two compilation modes:
+  --mode default  : ONNX → Relax → default pipeline (DLight Fallback, no tuning)
+  --mode tuned    : ONNX → Relax → LegalizeOps → apply MetaSchedule database
+
+The ONNX frontend is used because torch.export produces decomposed ops that
+MetaSchedule cannot schedule; from_onnx retains high-level R.nn.conv2d ops.
 
 Usage (from efml-unet/):
-  python scripts/benchmark_tvm.py
+  python scripts/benchmark_tvm.py [--mode default|tuned]
 """
 from __future__ import annotations
 
@@ -29,11 +32,22 @@ from src.data import build_dataset
 from src.metrics import compute_psnr, compute_ssim
 from src.config import load_config
 
-CROP_LR = 256
-SCALE   = 4
-WARMUP  = 1
-MEASURE = 3
-CONFIG  = "configs/sr_baseline_x4.yaml"
+CROP_LR   = 256
+SCALE     = 4
+WARMUP    = 10
+MEASURE   = 50
+CONFIG    = "configs/sr_baseline_x4.yaml"
+ARCH      = "sm_86"
+WORK_DIR  = "results/tvm_tuning"
+ONNX_PATH = "results/unet_sr_x4.onnx"
+
+# sm_86 (RTX 30xx / A10 / A30 / A40) hardware limits for MetaSchedule
+_CUDA_TARGET = {
+    "kind": "cuda",
+    "arch": ARCH,
+    "max_threads_per_block": 1024,
+    "max_shared_memory_per_block": 49152,
+}
 
 
 def build_loader(config: dict) -> DataLoader:
@@ -52,45 +66,95 @@ def build_loader(config: dict) -> DataLoader:
     return DataLoader(dataset, batch_size=1, shuffle=False, num_workers=4)
 
 
-def compile_tvm_cpu(model: torch.nn.Module):
-    """Export model via torch.export -> TVM Relax, compile for CPU/LLVM."""
+def load_onnx_relax():
+    """Load ONNX model and convert to Relax IR with fully-static shapes (batch=1)."""
+    import tvm
+    import onnx as onnx_lib
+    from tvm.relax.frontend.onnx import from_onnx
+    onnx_model = onnx_lib.load(ONNX_PATH)
+    mod = from_onnx(onnx_model, shape_dict={"input": [1, 3, CROP_LR, CROP_LR]},
+                    keep_params_in_input=False)
+    # Bind batch=1 — MetaSchedule cannot split symbolic loop bounds
+    return tvm.relax.transform.BindSymbolicVars({"batch": 1})(mod)
+
+
+def lower_mod(mod, target):
+    """High-level Relax IR → lowered call_tir IR."""
     import tvm
     from tvm import relax
-    from tvm.relax.frontend.torch import from_exported_program
+    return tvm.transform.Sequential([
+        relax.transform.DecomposeOpsForInference(),
+        relax.transform.CanonicalizeBindings(),
+        relax.transform.LegalizeOps(),
+        relax.transform.AnnotateTIROpPattern(),
+        relax.transform.FoldConstant(),
+        relax.transform.FuseOps(),
+        relax.transform.FuseTIR(),
+    ])(mod)
 
-    example_input = torch.randn(1, 3, CROP_LR, CROP_LR)
-    model_cpu = model.cpu().eval()
 
-    print("Exporting model with torch.export…")
-    with torch.no_grad():
-        exported = torch.export.export(model_cpu, (example_input,))
+def compile_tvm(model: torch.nn.Module, tuned: bool):
+    """Return (vm, dev). Exports ONNX if needed, compiles for CUDA."""
+    import tvm
+    from tvm import relax
+    from tvm.relax.backend.cuda.pipeline import dataflow_lower_passes, finalize_passes
 
-    print("Converting to TVM Relax IR…")
-    # keep_params_as_input=False bakes weights into the IR as constants
-    mod = from_exported_program(exported, keep_params_as_input=False, unwrap_unit_return_tuple=True)
+    target = tvm.target.Target(_CUDA_TARGET)
+    dev    = tvm.cuda(0)
 
-    target = tvm.target.Target("llvm")
-    dev    = tvm.cpu(0)
+    # Export ONNX if needed
+    onnx_path = Path(ONNX_PATH)
+    if not onnx_path.exists():
+        print("Exporting model to ONNX…")
+        dummy = torch.randn(1, 3, CROP_LR, CROP_LR)
+        with torch.no_grad():
+            torch.onnx.export(
+                model.cpu().eval(), (dummy,), str(onnx_path),
+                opset_version=17, input_names=["input"], output_names=["output"],
+                dynamic_axes={"input": {0: "batch"}, "output": {0: "batch"}},
+            )
 
-    print("Compiling with default LLVM pipeline (no autotuning)…")
-    t0 = time.perf_counter()
-    pipeline = relax.get_default_pipeline(target)
-    mod = pipeline(mod)
-    ex  = relax.build(mod, target=target)
+    print("Loading ONNX → Relax IR…")
+    mod = load_onnx_relax()
+
+    if tuned:
+        db_path = Path(WORK_DIR)
+        if not db_path.exists():
+            raise FileNotFoundError(
+                f"Tuning database not found at {WORK_DIR}. "
+                "Run `python scripts/tune_tvm.py` first."
+            )
+        print(f"Applying MetaSchedule database from {WORK_DIR}…")
+        t0 = time.perf_counter()
+        from tvm.s_tir import meta_schedule as ms
+        database = ms.database.JSONDatabase(work_dir=WORK_DIR)
+        ex = ms.relax_integration.compile_relax(
+            database=database,
+            mod=mod,
+            target=target,
+            params=None,
+        )
+    else:
+        print(f"Compiling with default CUDA pipeline ({ARCH}, no tuning)…")
+        t0 = time.perf_counter()
+        pipeline = relax.get_default_pipeline(target)
+        mod = pipeline(mod)
+        ex = relax.build(mod, target=target)
+
     print(f"  Compilation done in {time.perf_counter() - t0:.1f}s")
 
     vm = relax.VirtualMachine(ex, dev)
     return vm, dev
 
 
-def bench_tvm(vm, dev, loader: DataLoader) -> dict:
+def bench_tvm_cuda(vm, dev, loader: DataLoader, label: str) -> dict:
     import tvm
 
     latencies, psnrs, ssims = [], [], []
 
     for step, (lr, hr, _) in enumerate(loader):
-        # Use DLPack zero-copy bridge from torch → TVM
-        lr_tvm = tvm.ffi.from_dlpack(lr.contiguous())
+        lr_gpu = lr.cuda().contiguous()
+        lr_tvm = tvm.ffi.from_dlpack(lr_gpu)
 
         dev.sync()
         t0 = time.perf_counter()
@@ -109,23 +173,25 @@ def bench_tvm(vm, dev, loader: DataLoader) -> dict:
         if len(latencies) >= MEASURE:
             break
 
-    return _stats("TVM Relax CPU (LLVM, no tuning)", latencies, psnrs, ssims)
+    return _stats(label, latencies, psnrs, ssims)
 
 
-def bench_eager_cpu(model: torch.nn.Module, loader: DataLoader) -> dict:
-    device = torch.device("cpu")
+def bench_eager_cuda(model: torch.nn.Module, loader: DataLoader) -> dict:
+    device = torch.device("cuda")
     model  = prepare_model_for_inference(model, device, use_fp16=False)
     latencies, psnrs, ssims = [], [], []
 
     with torch.inference_mode():
         for step, (lr, hr, _) in enumerate(loader):
             lr = lr.to(device)
+            torch.cuda.synchronize()
             t0 = time.perf_counter()
             pred = model(lr)
+            torch.cuda.synchronize()
             elapsed = (time.perf_counter() - t0) * 1000
 
             if step >= WARMUP:
-                p = pred[0].float().clamp(0, 1)
+                p = pred[0].float().clamp(0, 1).cpu()
                 h = hr[0].float()
                 psnrs.append(compute_psnr(p, h))
                 ssims.append(compute_ssim(p, h))
@@ -133,7 +199,7 @@ def bench_eager_cpu(model: torch.nn.Module, loader: DataLoader) -> dict:
             if len(latencies) >= MEASURE:
                 break
 
-    return _stats("Eager PyTorch CPU", latencies, psnrs, ssims)
+    return _stats("Eager PyTorch CUDA FP32", latencies, psnrs, ssims)
 
 
 def _stats(label: str, latencies: list, psnrs: list, ssims: list) -> dict:
@@ -151,13 +217,13 @@ def _stats(label: str, latencies: list, psnrs: list, ssims: list) -> dict:
 
 
 def print_table(results: list[dict]) -> None:
-    print(f"\n{'Method':<38} {'lat_mean':>10} {'lat_p95':>9} {'tput':>10} {'PSNR':>7} {'SSIM':>6}")
-    print("-" * 84)
+    print(f"\n{'Method':<46} {'lat_mean':>10} {'lat_p95':>9} {'tput':>10} {'PSNR':>7} {'SSIM':>6}")
+    print("-" * 92)
     baseline = results[0]["latency_mean_ms"]
     for r in results:
         speedup = baseline / r["latency_mean_ms"]
         print(
-            f"{r['label']:<38} "
+            f"{r['label']:<46} "
             f"{r['latency_mean_ms']:>8.1f}ms "
             f"{r['latency_p95_ms']:>8.1f}ms "
             f"{r['throughput_img_s']:>8.1f}/s "
@@ -168,6 +234,12 @@ def print_table(results: list[dict]) -> None:
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=["default", "tuned"], default="default",
+                        help="default: compile fresh with DLight; tuned: apply MetaSchedule DB")
+    cli = parser.parse_args()
+
     config = load_config(CONFIG)
 
     model = build_model(3, 3, 64, SCALE)
@@ -177,19 +249,22 @@ if __name__ == "__main__":
 
     loader = build_loader(config)
 
-    print("── Eager PyTorch CPU baseline ─────────────────────────────")
-    r_eager = bench_eager_cpu(model, loader)
+    print("── Eager PyTorch CUDA FP32 baseline ───────────────────────")
+    r_eager = bench_eager_cuda(model, loader)
     print(json.dumps(r_eager, indent=2))
 
-    print("\n── TVM Relax CPU (LLVM, no autotuning) ────────────────────")
-    vm, dev = compile_tvm_cpu(model)
-    r_tvm = bench_tvm(vm, dev, loader)
+    tuned = cli.mode == "tuned"
+    label = f"TVM Relax CUDA {ARCH} ({'MetaSchedule tuned' if tuned else 'default pipeline'})"
+    print(f"\n── {label} ─────────────────────────")
+    vm, dev = compile_tvm(model, tuned=tuned)
+    r_tvm = bench_tvm_cuda(vm, dev, loader, label)
     print(json.dumps(r_tvm, indent=2))
 
     results = [r_eager, r_tvm]
     print_table(results)
 
-    out = Path("results/tvm_benchmark_x4.json")
+    suffix = "tuned" if tuned else "default"
+    out = Path(f"results/tvm_benchmark_x4_{suffix}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(results, indent=2))
     print(f"\nSaved → {out}")
