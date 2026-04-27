@@ -46,7 +46,7 @@ scripts/
   run_prune.py                global magnitude pruning
   run_prune_structured.py     structural expand-channel pruning
   run_sparse.py               2:4 semi-structured sparsity
-  run_group_conv.py           grouped 1×1 convolutions
+  run_group_conv.py           grouped 1x1 convolutions
   run_quantize.py             LSQ PTQ/QAT quantization
   benchmark_quant_batches.py  batch size sweep for quantized model
   animations/                 visualizations
@@ -58,7 +58,7 @@ inference.py        eval / inference entry point
 
 ## Model: SRUNetHeavy
 
-Checkpoint: `checkpoints/heavy_srunet_29M.pt` · **29M params** · scale ×4 · input/output **256×256**
+Checkpoint: `checkpoints/heavy_srunet_29M.pt` · **29M params** · scale x4 · input/output **256x256**
 
 ```
 stem (Conv3x3 → GroupNorm → GELU)
@@ -69,13 +69,13 @@ stem (Conv3x3 → GroupNorm → GELU)
   │
   bottleneck (MBResBlock + SEBlock)
   │
-  up1–4 (bilinear×2 → cat(skip) → MBResBlock)
+  up1–4 (bilinearx2 → cat(skip) → MBResBlock)
   │
   head (Conv1x1)
   + global residual
 ```
 
-**MBResBlock** (inverted residual): `GroupNorm+GELU+Conv1x1 (expand×4)` → `GroupNorm+GELU+DWConv3x3` → `Conv1x1+GroupNorm (project)` + skip. GroupNorm throughout — no BatchNorm, so channel removal doesn't break running statistics.
+**MBResBlock** (inverted residual): `GroupNorm+GELU+Conv1x1 (expandx4)` → `GroupNorm+GELU+DWConv3x3` → `Conv1x1+GroupNorm (project)` + skip. GroupNorm throughout — no BatchNorm, so channel removal doesn't break running statistics.
 
 **SEBlock**: global avg pool → Linear(C → C//4) → ReLU → Linear(C//4 → C) → Sigmoid → channel-wise scale.
 
@@ -85,7 +85,7 @@ stem (Conv3x3 → GroupNorm → GELU)
 
 ## Andrey: Acceleration experiments
 
-Model: `checkpoints/heavy_srunet_29M.pt` (29M params, SRUNetHeavy, scale ×4).
+Model: `checkpoints/heavy_srunet_29M.pt` (29M params, SRUNetHeavy, scale x4).
 
 **Latency measurement** (`src/acceleration/benchmark.py:measure_latency`): synthetic `torch.randn`, 20 warmup runs, then 200 timed runs via CUDA Events. Speedup = `baseline_latency / result_latency` on identical input size.
 
@@ -93,31 +93,31 @@ Model: `checkpoints/heavy_srunet_29M.pt` (29M params, SRUNetHeavy, scale ×4).
 
 **1. Global magnitude pruning** (`run_prune.py`, results: `results/andrey-results/prune_*.json`)
 
-Zeroes the N% smallest-magnitude weights globally across all 1×1 Conv2d layers via `torch.nn.utils.prune.global_unstructured`. Tensors stay dense — no real speedup (≈1.0×) at any ratio. SSIM degrades from 0.7689 to 0.67 at 100%.
+Zeroes the N% smallest-magnitude weights globally across all 1x1 Conv2d layers via `torch.nn.utils.prune.global_unstructured`. Tensors stay dense — no real speedup (≈1.0x) at any ratio. SSIM degrades from 0.7689 to 0.67 at 100%.
 
 **2. Structural expand-channel pruning** (`run_prune_structured.py`, results: `results/andrey-results/struct_*.json`)
 
-Physically removes the lowest-L1-norm output channels from the expand 1×1 conv in each MBResBlock. Only `mid_ch` shrinks — `in_ch`, `out_ch`, and skip connections are untouched, U-Net topology stays valid. `mid_ch` rounded to a multiple of `num_groups` (GroupNorm constraint).
+Physically removes the lowest-L1-norm output channels from the expand 1x1 conv in each MBResBlock. Only `mid_ch` shrinks — `in_ch`, `out_ch`, and skip connections are untouched, U-Net topology stays valid. `mid_ch` rounded to a multiple of `num_groups` (GroupNorm constraint).
 
 | Prune | Speedup BS=1 | Speedup BS=32 | SSIM (after ft) | SSIM drop |
 |-------|-------------|--------------|-----------------|-----------|
-| 25%   | 1.23×       | 1.23×        | 0.7598          | −0.009    |
-| 50%   | 1.57×       | 1.68×        | 0.7581          | —         |
-| 75%   | 2.27×       | 2.53×        | 0.7598          | −0.009    |
+| 25%   | 1.23x       | 1.23x        | 0.7598          | −0.009    |
+| 50%   | 1.57x       | 1.68x        | 0.7581          | —         |
+| 75%   | 2.27x       | 2.53x        | 0.7598          | −0.009    |
 
-Best result: **75% + 10 epochs finetune** — 2.27× speedup, SSIM drop only 0.009, model shrinks from 29.3M to 8.4M params.
+Best result: **75% + 10 epochs finetune** — 2.27x speedup, SSIM drop only 0.009, model shrinks from 29.3M to 8.4M params.
 
-**3. Grouped 1×1 convolutions** (`run_group_conv.py`, results: `results/andrey-results/group*.json`)
+**3. Grouped 1x1 convolutions** (`run_group_conv.py`, results: `results/andrey-results/group*.json`)
 
-Replaces expand/project 1×1 Conv2d with grouped conv (G=2 or G=4). Init: block-diagonal slice of original weight matrix. FLOPs ÷ G, but actual speedup limited by CUDA matmul overhead.
+Replaces expand/project 1x1 Conv2d with grouped conv (G=2 or G=4). Init: block-diagonal slice of original weight matrix. FLOPs ÷ G, but actual speedup limited by CUDA matmul overhead.
 
 Visualization: [grouped sparsification animation](scripts/animations/grouped_sparsification.webm) · [Google Drive](https://drive.google.com/file/d/11Wazp6hj3aZ3Mg-O0sREZ30C03yOJpsc/view?usp=share_link)
 
 | Config     | Speedup | SSIM drop |
 |------------|---------|-----------|
-| G=2 expand | 1.03×   | −0.016    |
-| G=2 both   | 1.07×   | −0.021    |
-| G=4 both   | 1.13×   | −0.035    |
+| G=2 expand | 1.03x   | −0.016    |
+| G=2 both   | 1.07x   | −0.021    |
+| G=4 both   | 1.13x   | −0.035    |
 
 Worse tradeoff than structural pruning.
 
@@ -129,8 +129,8 @@ A100 results (FP16):
 
 | BS | Baseline | Sparse  | Speedup |
 |----|----------|---------|---------|
-| 1  | 26.0 ms  | 31.1 ms | 0.84×   |
-| 32 | 155 ms   | 411 ms  | 0.38×   |
+| 1  | 26.0 ms  | 31.1 ms | 0.84x   |
+| 32 | 155 ms   | 411 ms  | 0.38x   |
 
 No speedup at any tested batch size — matrices too small for cuSPARSELt overhead to amortise.
 
@@ -162,14 +162,14 @@ python scripts/run_group_conv.py groups=4 target=both finetune.epochs=10 results
 
 | Method | Precision | Latency | Throughput | Speedup |
 |---|---|---:|---:|---:|
-| Eager PyTorch | FP32 | 48.1 ms | 20.8 img/s | 1.00× |
-| Eager PyTorch | FP16 | 31.7 ms | 31.6 img/s | 1.52× |
-| `torch.compile` (max-autotune) | FP32 | 46.6 ms | 21.5 img/s | 1.03× |
-| ORT CUDA EP | FP32 | 46.1 ms | 21.6 img/s | 1.04× |
-| **ORT TensorRT EP** | **FP32** | **29.8 ms** | **33.6 img/s** | **1.61×** |
-| **ORT TensorRT EP** | **FP16** | **13.3 ms** | **75.2 img/s** | **3.62×** |
+| Eager PyTorch | FP32 | 48.1 ms | 20.8 img/s | 1.00x |
+| Eager PyTorch | FP16 | 31.7 ms | 31.6 img/s | 1.52x |
+| `torch.compile` (max-autotune) | FP32 | 46.6 ms | 21.5 img/s | 1.03x |
+| ORT CUDA EP | FP32 | 46.1 ms | 21.6 img/s | 1.04x |
+| **ORT TensorRT EP** | **FP32** | **29.8 ms** | **33.6 img/s** | **1.61x** |
+| **ORT TensorRT EP** | **FP16** | **13.3 ms** | **75.2 img/s** | **3.62x** |
 
-TRT FP32 ×1.61: fusion of GroupNorm+GELU+Conv1×1 sequences reduces kernel-launch overhead, more impactful for shallow 1×1 layers than deep 3×3. TRT FP16 ×3.62: 1×1 pointwise convolutions are GEMMs and use tensor cores, partially compensating for DWConv's TC-incompatibility.
+TRT FP32 x1.61: fusion of GroupNorm+GELU+Conv1x1 sequences reduces kernel-launch overhead, more impactful for shallow 1x1 layers than deep 3x3. TRT FP16 x3.62: 1x1 pointwise convolutions are GEMMs and use tensor cores, partially compensating for DWConv's TC-incompatibility.
 
 ### Roofline analysis (SRUNetHeavy)
 
@@ -203,22 +203,22 @@ LSQ uses **fake quantization**: weights stay in float, but the forward pass simu
 
 In PTQ mode, step sizes `s` are initialized from weight statistics and frozen after calibration — no fine-tuning required.
 
-### Results on A100-SXM4-80GB (256×256, 100 runs)
+### Results on A100-SXM4-80GB (256x256, 100 runs)
 
 | Config | SSIM | Size | BS=1 | BS=4 | BS=16 | BS=64 | Speedup vs FP16 (BS=64) |
 |---|---|---|---:|---:|---:|---:|---:|
-| FP32 | 0.7689 | 111.7 MB | 30.2 ms | 51.0 ms | 128.9 ms | 485.8 ms | 0.63× |
-| **FP16** | **0.7689** | **55.8 MB** | **26.1 ms** | **41.0 ms** | **89.3 ms** | **306.9 ms** | **1.00×** |
-| LSQ + FP32 | 0.7681 | 28.1 MB | 41.3 ms | 61.5 ms | 139.5 ms | 496.0 ms | 0.62× |
-| LSQ + FP16 | 0.7680 | 28.1 MB | 37.7 ms | 51.9 ms | 99.9 ms | 316.8 ms | 0.97× |
+| FP32 | 0.7689 | 111.7 MB | 30.2 ms | 51.0 ms | 128.9 ms | 485.8 ms | 0.63x |
+| **FP16** | **0.7689** | **55.8 MB** | **26.1 ms** | **41.0 ms** | **89.3 ms** | **306.9 ms** | **1.00x** |
+| LSQ + FP32 | 0.7681 | 28.1 MB | 41.3 ms | 61.5 ms | 139.5 ms | 496.0 ms | 0.62x |
+| LSQ + FP16 | 0.7680 | 28.1 MB | 37.7 ms | 51.9 ms | 99.9 ms | 316.8 ms | 0.97x |
 
 ### Key findings
 
-1. **4× model compression without fine-tuning.** INT8 state dict: 28.1 MB vs 111.7 MB (FP32). Reduces memory footprint and load time.
+1. **4x model compression without fine-tuning.** INT8 state dict: 28.1 MB vs 111.7 MB (FP32). Reduces memory footprint and load time.
 
 2. **Quality preserved.** LSQ+FP16 SSIM = 0.7680 vs 0.7689 (FP32) — PTQ without fine-tuning gives acceptable quality.
 
-3. **LSQ+FP16 matches FP16 throughput.** At BS=64 speedup is 0.97× vs FP16, while using 2× less memory (28.1 MB vs 55.8 MB).
+3. **LSQ+FP16 matches FP16 throughput.** At BS=64 speedup is 0.97x vs FP16, while using 2x less memory (28.1 MB vs 55.8 MB).
 
 ### Running experiments
 
