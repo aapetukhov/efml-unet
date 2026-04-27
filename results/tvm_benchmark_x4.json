@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Eager PyTorch CUDA FP32",
+    "latency_mean_ms": 125.94792111834977,
+    "latency_std_ms": 2.0188397186480787,
+    "latency_p50_ms": 125.570805001189,
+    "latency_p95_ms": 129.82327483332483,
+    "throughput_img_s": 7.939789645756263,
+    "psnr": 23.49709642130205,
+    "ssim": 0.6918364888429642
+  },
+  {
+    "label": "TVM Relax CUDA sm_86 (no tuning)",
+    "latency_mean_ms": 370.96081039926503,
+    "latency_std_ms": 4.218184480987402,
+    "latency_p50_ms": 371.8199580180226,
+    "latency_p95_ms": 374.46733400283847,
+    "throughput_img_s": 2.695702543143844,
+    "psnr": 23.49708429218072,
+    "ssim": 0.6918360340595245
+  }
+]

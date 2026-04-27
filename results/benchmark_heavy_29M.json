@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "timestamp": "2026-04-27T13:28:15.661602",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 3060",
+    "torch_version": "2.6.0+cu124",
+    "cuda_version": "12.4",
+    "cudnn_version": "90100",
+    "platform": "Linux-6.17.0-22-generic-x86_64-with-glibc2.39",
+    "scale": 4,
+    "input_size": 256,
+    "base_channels": 64,
+    "batch_size": 1,
+    "warmup": 10,
+    "steps": 50,
+    "checkpoint": "../heavy_srunet_29M.pt"
+  },
+  "results": [
+    {
+      "label": "Eager FP32 (CUDA)",
+      "latency_mean_ms": 48.34674438476563,
+      "latency_std_ms": 0.48453637853227194,
+      "latency_p50_ms": 48.099952697753906,
+      "latency_p95_ms": 48.98823833465576,
+      "throughput_img_s": 20.683916005626774,
+      "peak_mem_mb": 887.0
+    },
+    {
+      "label": "Eager FP16 (CUDA)",
+      "latency_mean_ms": 31.679340133666994,
+      "latency_std_ms": 0.397740611734725,
+      "latency_p50_ms": 31.600640296936035,
+      "latency_p95_ms": 31.77906045913696,
+      "throughput_img_s": 31.56631406401225,
+      "peak_mem_mb": 449.5
+    },
+    {
+      "label": "torch.compile [default] (CUDA)",
+      "latency_mean_ms": 47.648516998291015,
+      "latency_std_ms": 0.16389423044340343,
+      "latency_p50_ms": 47.638816833496094,
+      "latency_p95_ms": 47.85018081665039,
+      "throughput_img_s": 20.987012041442267,
+      "peak_mem_mb": 557.1
+    },
+    {
+      "label": "torch.compile [reduce-overhead] (CUDA)",
+      "latency_mean_ms": 47.47596160888672,
+      "latency_std_ms": 0.13306649249298505,
+      "latency_p50_ms": 47.4979362487793,
+      "latency_p95_ms": 47.61847190856933,
+      "throughput_img_s": 21.063291107995514,
+      "peak_mem_mb": 557.1
+    },
+    {
+      "label": "torch.compile [max-autotune] (CUDA)",
+      "latency_mean_ms": 46.608292198181154,
+      "latency_std_ms": 0.11182204095138643,
+      "latency_p50_ms": 46.62696075439453,
+      "latency_p95_ms": 46.67768878936768,
+      "throughput_img_s": 21.455409602822225,
+      "peak_mem_mb": 640.5
+    },
+    {
+      "label": "ORT CUDA EP",
+      "latency_mean_ms": 46.2087406986393,
+      "latency_std_ms": 0.7117570590547895,
+      "latency_p50_ms": 46.03230400243774,
+      "latency_p95_ms": 48.23126186383888,
+      "throughput_img_s": 21.64092734146825,
+      "peak_mem_mb": 0.8
+    }
+  ]
+}

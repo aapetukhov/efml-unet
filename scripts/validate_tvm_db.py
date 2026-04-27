@@ -143,10 +143,9 @@ def find_bad_workloads(
 ) -> set[str]:
     """
     Recursively find all bad workload keys among candidate_keys.
-    all_keys: the full set of workload keys (used to compute 'others').
     At each step: test only candidate_keys (others → DLight).
     If crash: recurse on left and right halves independently.
-    At leaf (single key): test all_keys MINUS this one key; if clean → it's bad.
+    At leaf (single key): test that key alone; if crash → it's bad.
     """
     indent = "  " * depth
 
@@ -155,15 +154,14 @@ def find_bad_workloads(
 
     if len(candidate_keys) == 1:
         key = candidate_keys[0]
-        # Test full database minus this one key
-        without_key = all_keys - {key}
-        print(f"{indent}Leaf: testing without 1 workload...")
-        clean_without = test_subset(without_key, all_records, all_workloads, work_dir)
-        if clean_without:
+        # Test this single workload in isolation (others fall to DLight)
+        print(f"{indent}Leaf: testing 1 workload in isolation...")
+        crashes = not test_subset({key}, all_records, all_workloads, work_dir)
+        if crashes:
             print(f"{indent}  → BAD workload confirmed")
             return {key}
         else:
-            print(f"{indent}  → not the only bad one (or not bad)")
+            print(f"{indent}  → clean (not bad)")
             return set()
 
     mid = len(candidate_keys) // 2

@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "timestamp": "2026-04-27T12:03:30.067297",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 3060",
+    "torch_version": "2.6.0+cu124",
+    "cuda_version": "12.4",
+    "cudnn_version": "90100",
+    "platform": "Linux-6.17.0-22-generic-x86_64-with-glibc2.39",
+    "scale": 4,
+    "input_size": 256,
+    "base_channels": 64,
+    "batch_size": 1,
+    "warmup": 10,
+    "steps": 50,
+    "checkpoint": "../heavy_srunet_29M.pt"
+  },
+  "results": [
+    {
+      "label": "Eager FP32 (CUDA)",
+      "latency_mean_ms": 56.77007141113281,
+      "latency_std_ms": 16.405687133623818,
+      "latency_p50_ms": 50.00113487243652,
+      "latency_p95_ms": 92.85906562805175,
+      "throughput_img_s": 17.61491530912354,
+      "peak_mem_mb": 887.0
+    },
+    {
+      "label": "torch.compile [default] (CUDA)",
+      "latency_mean_ms": 47.99047233581543,
+      "latency_std_ms": 0.34632616402470295,
+      "latency_p50_ms": 47.92880058288574,
+      "latency_p95_ms": 48.43908500671387,
+      "throughput_img_s": 20.83746942523208,
+      "peak_mem_mb": 824.7
+    },
+    {
+      "label": "torch.compile [reduce-overhead] (CUDA)",
+      "latency_mean_ms": 47.587309494018555,
+      "latency_std_ms": 0.06117703866229077,
+      "latency_p50_ms": 47.58420753479004,
+      "latency_p95_ms": 47.69161396026611,
+      "throughput_img_s": 21.0140058480443,
+      "peak_mem_mb": 557.1
+    },
+    {
+      "label": "torch.compile [max-autotune] (CUDA)",
+      "latency_mean_ms": 96.93393688201904,
+      "latency_std_ms": 7.948096121355634,
+      "latency_p50_ms": 98.38118362426758,
+      "latency_p95_ms": 99.06172981262208,
+      "throughput_img_s": 10.316304404484546,
+      "peak_mem_mb": 850.5
+    },
+    {
+      "label": "ORT CUDA EP",
+      "latency_mean_ms": 62.21697874250822,
+      "latency_std_ms": 22.52319931033508,
+      "latency_p50_ms": 46.98867849947419,
+      "latency_p95_ms": 97.25636314542498,
+      "throughput_img_s": 16.072783028224652,
+      "peak_mem_mb": 0.8
+    }
+  ]
+}
