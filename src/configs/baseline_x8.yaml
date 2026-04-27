@@ -1,0 +1,38 @@
+# Training config for scale x8
+
+defaults:
+  - dataloader: sr
+  - datasets: sr_x8
+  - metrics: sr
+  - model: unet
+  - transforms: sr
+  - writer: console
+  - _self_
+
+experiment_name: sr_unet_x8_residual
+seed: 42
+
+trainer:
+  device: cuda
+  epochs: 60
+  log_every: 5
+  val_every: 1
+  grad_clip: 1.0
+  mixed_precision: true
+  save_dir: checkpoints
+  save_name: sr_unet_x8.pt
+  image_log_every: 100
+  image_log_samples: 4
+
+optimization:
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 1e-3
+    weight_decay: 1e-6
+  scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: ${trainer.epochs}
+    eta_min: 0
+
+criterion:
+  _target_: src.loss.l1.L1LossWrapper

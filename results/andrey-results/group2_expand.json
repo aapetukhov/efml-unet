@@ -1,0 +1,20 @@
+{
+  "method": "group_conv",
+  "timestamp": "2026-04-25T03:12:35.911761",
+  "checkpoint_in": "checkpoints/heavy_srunet_29M.pt",
+  "checkpoint_out": "checkpoints/heavy_group2_exp.pt",
+  "baseline": {
+    "ssim": 0.7689,
+    "latency_ms": 33.58
+  },
+  "result": {
+    "ssim": 0.7534,
+    "latency_ms": 32.68
+  },
+  "speedup": 1.027,
+  "ssim_drop": 0.0155,
+  "groups": 2,
+  "target": "expand",
+  "finetuned": true,
+  "finetune_epochs": 5
+}

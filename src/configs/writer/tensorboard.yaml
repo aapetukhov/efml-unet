@@ -1,0 +1,7 @@
+# TensorBoard writer
+# Usage: python train.py writer=tensorboard
+# On remote server: tensorboard --logdir=runs
+# SSH tunnel:       ssh -L 6006:localhost:6006 <user@remote>
+# Then open:        http://localhost:6006
+name: tensorboard
+log_dir: runs/${experiment_name}

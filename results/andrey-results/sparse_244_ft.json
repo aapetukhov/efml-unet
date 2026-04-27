@@ -1,0 +1,50 @@
+{
+  "method": "sparse_2_4",
+  "timestamp": "2026-04-25T02:14:39.198181",
+  "checkpoint_in": "checkpoints/heavy_srunet_29M.pt",
+  "checkpoint_out": "checkpoints/heavy_sparse244_ft.pt",
+  "baseline": {
+    "ssim": 0.7689,
+    "latency_ms": 34.14
+  },
+  "result": {
+    "ssim": 0.7678,
+    "latency_ms": 35.05
+  },
+  "speedup": 0.974,
+  "ssim_drop": 0.0011,
+  "sparsity": 0.4907,
+  "convert_to_sparse": false,
+  "finetuned": true,
+  "finetune_epochs": 5,
+  "pruned_layers": [
+    "inc.expand.2",
+    "inc.project.0",
+    "down1.block.expand.2",
+    "down1.block.project.0",
+    "down1.block.skip",
+    "down2.block.expand.2",
+    "down2.block.project.0",
+    "down2.block.skip",
+    "down3.block.expand.2",
+    "down3.block.project.0",
+    "down3.block.skip",
+    "down4.block.expand.2",
+    "down4.block.project.0",
+    "bottleneck.0.expand.2",
+    "bottleneck.0.project.0",
+    "up1.block.expand.2",
+    "up1.block.project.0",
+    "up1.block.skip",
+    "up2.block.expand.2",
+    "up2.block.project.0",
+    "up2.block.skip",
+    "up3.block.expand.2",
+    "up3.block.project.0",
+    "up3.block.skip",
+    "up4.block.expand.2",
+    "up4.block.project.0",
+    "up4.block.skip",
+    "head"
+  ]
+}

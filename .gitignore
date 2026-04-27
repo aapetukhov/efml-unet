@@ -118,6 +118,8 @@ data/
 .DS_Store
 
 inference_examples/
-*.zip
 runs/
+media/
 profiler_traces/
+
+*.zip

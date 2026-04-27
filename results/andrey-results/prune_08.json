@@ -1,0 +1,20 @@
+{
+  "method": "global_magnitude_prune",
+  "timestamp": "2026-04-25T02:21:29.061198",
+  "checkpoint_in": "checkpoints/heavy_srunet_29M.pt",
+  "checkpoint_out": "checkpoints/heavy_pruned_08.pt",
+  "baseline": {
+    "ssim": 0.7689,
+    "latency_ms": 33.97
+  },
+  "result": {
+    "ssim": 0.7476,
+    "latency_ms": 34.03
+  },
+  "speedup": 0.998,
+  "ssim_drop": 0.0213,
+  "sparsity": 0.7851,
+  "prune_ratio": 0.8,
+  "finetuned": false,
+  "finetune_epochs": 0
+}

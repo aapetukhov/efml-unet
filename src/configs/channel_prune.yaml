@@ -1,0 +1,47 @@
+# Global magnitude pruning experiment
+# Zeroes out bottom prune_ratio fraction of 1x1 Conv2d weights globally
+#
+# Usage:
+#   python scripts/run_prune.py
+#   python scripts/run_prune.py prune_ratio=0.4
+#   python scripts/run_prune.py prune_ratio=0.5 finetune.epochs=10
+
+defaults:
+  - /dataloader: sr
+  - /datasets: sr_x4
+  - /transforms: sr
+  - _self_
+
+checkpoint_in: checkpoints/heavy_srunet_29M.pt
+checkpoint_out: checkpoints/heavy_srunet_29M_pruned30.pt
+results_dir: results
+results_name: channel_prune_30
+
+model:
+  _target_: src.model.heavy_model.SRUNetHeavy
+  in_channels: 3
+  out_channels: 3
+  base_channels: 96
+  expand_ratio: 4
+  se_bottleneck_ratio: 4
+  residual: true
+  num_groups: 8
+
+# Fraction of 1x1 conv weights to zero out (globally across all layers)
+prune_ratio: 0.30
+
+finetune:
+  enabled: true
+  epochs: 5
+  lr: 1e-4
+  criterion:
+    _target_: src.loss.l1.L1LossWrapper
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 1e-4
+    weight_decay: 1e-5
+
+benchmark:
+  input_size: [ 1, 3, 256, 256 ]
+  n_warmup: 20
+  n_runs: 200
