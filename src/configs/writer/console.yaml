@@ -1,0 +1,5 @@
+# Default writer: console-only (no external trackers required)
+name: console
+project: efml
+entity: null
+run_name: ${experiment_name}

@@ -1,0 +1,7 @@
+# Metrics to compute during training and inference
+# Add more metrics by appending _target_ entries
+train:
+  - _target_: src.metrics.ssim.SSIMMetric
+
+inference:
+  - _target_: src.metrics.ssim.SSIMMetric

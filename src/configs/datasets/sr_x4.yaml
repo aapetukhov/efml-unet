@@ -1,0 +1,17 @@
+# Dataset paths and augmentation knobs for SR x4
+scale: 4
+
+train:
+  hr_dir: data/sr/train_hr
+  crop_size: 192   # divisible by 4
+  random_crop: true
+
+val:
+  hr_dir: data/sr/val_hr
+  crop_size: 192   # center crop for eval
+  random_crop: false
+
+test:
+  hr_dir: data/sr/test_hr
+  crop_size: null
+  random_crop: false

@@ -1,0 +1,16 @@
+# Heavy U-Net for sparsification / pruning experiments
+# Switch with: python train.py model=heavy_unet
+#
+# Acceleration paths after training:
+#   2:4 sparsity:   target expand/project 1x1 Conv weights in MBResBlock
+#   channel pruning: use SE attention magnitudes as importance scores
+#   expand_ratio ↓: re-finetune with smaller expand_ratio (e.g. 4→2)
+#   grouped expand: replace expand 1x1 with Conv2d(groups=G) after pruning
+_target_: src.model.heavy_model.SRUNetHeavy
+in_channels: 3
+out_channels: 3
+base_channels: 96
+expand_ratio: 4
+se_bottleneck_ratio: 4
+residual: true
+num_groups: 8

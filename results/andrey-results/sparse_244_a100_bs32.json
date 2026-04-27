@@ -1,0 +1,23 @@
+{
+  "method": "sparse_2_4",
+  "timestamp": "2026-04-25T22:46:34.000000",
+  "checkpoint_in": "checkpoints/heavy_srunet_29M.pt",
+  "checkpoint_out": "checkpoints/sparse244_a100.pt",
+  "baseline": {
+    "ssim": 0.7689,
+    "latency_ms": 155.22
+  },
+  "result": {
+    "ssim": 0.7018,
+    "latency_ms": 410.76
+  },
+  "speedup": 0.378,
+  "ssim_drop": 0.067,
+  "sparsity": 0.491,
+  "convert_to_sparse": true,
+  "fp16": true,
+  "finetuned": false,
+  "finetune_epochs": 0,
+  "benchmark_input_size": [32, 3, 256, 256],
+  "pruned_layers_count": 28
+}

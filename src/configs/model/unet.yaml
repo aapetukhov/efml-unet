@@ -1,0 +1,8 @@
+# U-Net baseline for SR
+# To swap architecture: change _target_ and add/remove params accordingly
+_target_: src.model.baseline_model.SRUNet
+in_channels: 3
+out_channels: 3
+base_channels: 64
+bilinear: true
+residual: true

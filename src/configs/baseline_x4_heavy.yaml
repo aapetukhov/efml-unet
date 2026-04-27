@@ -1,0 +1,39 @@
+# Training config: heavy U-Net, scale x4
+# Run: python train.py --config-name baseline_x4_heavy
+
+defaults:
+  - dataloader: sr
+  - datasets: sr_x4
+  - metrics: sr
+  - model: heavy_unet
+  - transforms: sr
+  - writer: console
+  - _self_
+
+experiment_name: sr_unet_heavy_x4
+seed: 42
+
+trainer:
+  device: auto
+  epochs: 50
+  log_every: 10
+  val_every: 1
+  grad_clip: 1.0
+  mixed_precision: true
+  save_dir: checkpoints
+  save_name: srunet_heavy_x4.pt
+  image_log_every: 100
+  image_log_samples: 4
+
+optimization:
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 5e-4      # slightly lower lr for wider network
+    weight_decay: 1e-5
+  scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: ${trainer.epochs}
+    eta_min: 0
+
+criterion:
+  _target_: src.loss.l1.L1LossWrapper
