@@ -1,0 +1,6 @@
+{
+  "experiment_name": "unet_sr_x4_baseline",
+  "psnr": 23.648729055401564,
+  "ssim": 0.6745536953210831,
+  "num_images": 100
+}

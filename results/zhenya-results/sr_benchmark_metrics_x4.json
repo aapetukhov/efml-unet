@@ -1,0 +1,18 @@
+{
+  "latency_mean_ms": 232.71504174001166,
+  "latency_std_ms": 22.395889673675697,
+  "latency_p50_ms": 235.8330204997401,
+  "latency_p95_ms": 255.30099550041996,
+  "throughput_images_per_s": 4.297100834234842,
+  "psnr": 23.868904195175933,
+  "ssim": 0.6833911460638046,
+  "measured_steps": 50,
+  "total_images": 50,
+  "experiment_name": "unet_sr_x4_baseline",
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 3060",
+  "use_fp16": false,
+  "compile_mode": "reduce-overhead",
+  "scale": 4,
+  "batch_size": 1
+}
