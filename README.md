@@ -171,3 +171,66 @@ python scripts/run_sparse.py fp16=true convert_to_sparse=true results_name=spars
 # group conv G=4 both, 10 epochs
 python scripts/run_group_conv.py groups=4 target=both finetune.epochs=10 results_name=group4_both
 ```
+
+---
+
+## Zhenya: Acceleration experiments
+
+Model: `checkpoints/unet_sr_x4_baseline.pt` (8.23M params, UNetSR baseline, scale x4).
+
+**Latency measurement** (`run_all_benchmarks.py`): synthetic `torch.randn` input, BS=1, 256×256 LR → 1024×1024 HR, 10 warmup runs, then 50 timed runs via CUDA Events. Hardware: NVIDIA GeForce RTX 3060 (12 GB, 360 GB/s). Speedup = `FP32 eager latency / result latency`.
+
+### Methods and results
+
+**1. FP16** (results: `results/zhenya-results/comparison_table.md`)
+
+`.half()` cast on model and input — no structural changes. Compute throughput doubles (12.74 → 25.48 TFLOPS), DRAM traffic halved.
+
+| Precision | Latency | Throughput | Speedup |
+|---|---:|---:|---:|
+| FP32 | 125 ms | 8.0 img/s | 1.00x |
+| FP16 | 81.5 ms | 12.3 img/s | 1.53x |
+
+**2. `torch.compile`** (results: `results/zhenya-results/comparison_table.md`)
+
+Inductor backend compiles to Triton kernels. Both `default` and `reduce-overhead` modes are slower than eager — Triton-generated kernels cannot match cuDNN for standard 3×3 convolutions.
+
+| Mode | Latency | Throughput | Speedup |
+|---|---:|---:|---:|
+| default | 237 ms | 4.2 img/s | 0.53x |
+| reduce-overhead | 233 ms | 4.3 img/s | 0.54x |
+
+**3. ONNX Runtime** (results: `results/zhenya-results/ort_benchmark_x4.json`)
+
+Model exported to ONNX, run via two ORT execution providers. CUDA EP applies standard op fusion, no autotuning — essentially the same speed as eager. TensorRT EP applies layer fusion, cuDNN kernel autotuning, and in FP16 routes through tensor cores.
+
+| EP | Precision | Latency | Throughput | Speedup |
+|---|---|---:|---:|---:|
+| CUDA EP | FP32 | 130 ms | 7.7 img/s | 0.97x |
+| TensorRT EP | FP32 | 97 ms | 10.3 img/s | 1.40x |
+| **TensorRT EP** | **FP16** | **34 ms** | **29.7 img/s** | **4.02x** |
+
+Best result: **TensorRT EP FP16** — 4.02x speedup, identical PSNR/SSIM (23.497 / 0.6918).
+
+**4. TVM** (results: `results/zhenya-results/comparison_table.md`)
+
+Two schedule strategies tested. DLight (rule-based, no autotuning) falls back to generic schedules on 3×3 conv and runs ~4x slower than eager. MetaSchedule (evolutionary search) improves with more trials but plateaus below cuDNN.
+
+| Schedule | Trials | Tuning time | Latency | Speedup |
+|---|---:|---:|---:|---:|
+| DLight (no tuning) | — | — | 511 ms | 0.24x |
+| MetaSchedule replay-func | 512 | 37.5 min | 205 ms | 0.61x |
+| MetaSchedule replay-func | 1024 | 72 min | 152 ms | 0.83x |
+
+Each doubling of trials gives ~25% latency reduction; 1024 trials reaches 0.83x of PyTorch eager — close but still below cuDNN.
+
+### Roofline analysis
+
+UNetSR baseline: 806 GFLOPs, ~8892 MB DRAM traffic (FP32, upper bound). Arithmetic intensity = 90.7 FLOPs/byte; RTX 3060 FP32 ridge point = 35.4 FLOPs/byte → model is **compute-bound** in FP32 and FP16 (no tensor cores), **memory-bound** relative to FP16 tensor core ceiling. Eager FP32 achieves ~6450 GFLOPs/s (~51% GPU utilisation). Full derivation: `results/zhenya-results/roofline_calculations.md`.
+
+### Running experiments
+
+```bash
+python run_all_benchmarks.py --checkpoint checkpoints/unet_sr_x4_baseline.pt --scale 4 --fp16
+# add --no-tvm to skip TVM (slow to tune)
+```
