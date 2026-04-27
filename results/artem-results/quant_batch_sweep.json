@@ -1,0 +1,327 @@
+{
+  "timestamp": "2026-04-27T02:47:30.705817",
+  "gpu_info": {
+    "gpu_name": "NVIDIA A100-SXM4-80GB",
+    "gpu_memory_gb": 85.1,
+    "cuda_version": "13.0",
+    "pytorch_version": "2.11.0+cu130"
+  },
+  "params": {
+    "batch_sizes": [
+      1,
+      4,
+      16,
+      64
+    ],
+    "H": 256,
+    "W": 256,
+    "n_warmup": 10,
+    "n_runs": 100
+  },
+  "ssim": {
+    "fp32": 0.7689,
+    "fp16": 0.7689,
+    "lsq_int8_fp32": 0.7681,
+    "lsq_int8_fp16": 0.768
+  },
+  "model_sizes_mb": {
+    "fp32": 111.66,
+    "fp16": 55.83,
+    "lsq_int8_fp32": 28.06,
+    "lsq_int8_fp16": 28.06
+  },
+  "latency": {
+    "fp32": {
+      "1": {
+        "mean_ms": 30.18,
+        "median_ms": 30.179,
+        "p90_ms": 30.204,
+        "p95_ms": 30.22,
+        "std_ms": 0.025,
+        "min_ms": 30.118,
+        "max_ms": 30.328,
+        "throughput_ips": 33.1,
+        "speedup_vs_fp16": 0.864
+      },
+      "4": {
+        "mean_ms": 50.994,
+        "median_ms": 50.966,
+        "p90_ms": 51.114,
+        "p95_ms": 51.131,
+        "std_ms": 0.076,
+        "min_ms": 50.929,
+        "max_ms": 51.32,
+        "throughput_ips": 78.4,
+        "speedup_vs_fp16": 0.804
+      },
+      "16": {
+        "mean_ms": 128.931,
+        "median_ms": 128.901,
+        "p90_ms": 129.043,
+        "p95_ms": 129.072,
+        "std_ms": 0.084,
+        "min_ms": 128.827,
+        "max_ms": 129.307,
+        "throughput_ips": 124.1,
+        "speedup_vs_fp16": 0.693
+      },
+      "64": {
+        "mean_ms": 485.785,
+        "median_ms": 485.761,
+        "p90_ms": 486.469,
+        "p95_ms": 486.648,
+        "std_ms": 0.531,
+        "min_ms": 484.801,
+        "max_ms": 486.91,
+        "throughput_ips": 131.7,
+        "speedup_vs_fp16": 0.632
+      }
+    },
+    "fp16": {
+      "1": {
+        "mean_ms": 26.066,
+        "median_ms": 26.058,
+        "p90_ms": 26.1,
+        "p95_ms": 26.177,
+        "std_ms": 0.065,
+        "min_ms": 25.999,
+        "max_ms": 26.37,
+        "throughput_ips": 38.4,
+        "speedup_vs_fp16": 1.0
+      },
+      "4": {
+        "mean_ms": 40.991,
+        "median_ms": 40.966,
+        "p90_ms": 41.1,
+        "p95_ms": 41.156,
+        "std_ms": 0.076,
+        "min_ms": 40.923,
+        "max_ms": 41.318,
+        "throughput_ips": 97.6,
+        "speedup_vs_fp16": 1.0
+      },
+      "16": {
+        "mean_ms": 89.308,
+        "median_ms": 89.287,
+        "p90_ms": 89.432,
+        "p95_ms": 89.453,
+        "std_ms": 0.094,
+        "min_ms": 89.178,
+        "max_ms": 89.848,
+        "throughput_ips": 179.2,
+        "speedup_vs_fp16": 1.0
+      },
+      "64": {
+        "mean_ms": 306.886,
+        "median_ms": 306.729,
+        "p90_ms": 307.793,
+        "p95_ms": 307.863,
+        "std_ms": 0.517,
+        "min_ms": 306.098,
+        "max_ms": 308.261,
+        "throughput_ips": 208.5,
+        "speedup_vs_fp16": 1.0
+      }
+    },
+    "lsq_int8_fp32": {
+      "1": {
+        "mean_ms": 41.288,
+        "median_ms": 41.283,
+        "p90_ms": 41.566,
+        "p95_ms": 41.683,
+        "std_ms": 0.193,
+        "min_ms": 40.927,
+        "max_ms": 41.73,
+        "throughput_ips": 24.2,
+        "speedup_vs_fp16": 0.631
+      },
+      "4": {
+        "mean_ms": 61.454,
+        "median_ms": 61.435,
+        "p90_ms": 61.697,
+        "p95_ms": 61.803,
+        "std_ms": 0.182,
+        "min_ms": 61.143,
+        "max_ms": 62.181,
+        "throughput_ips": 65.1,
+        "speedup_vs_fp16": 0.667
+      },
+      "16": {
+        "mean_ms": 139.474,
+        "median_ms": 139.399,
+        "p90_ms": 139.711,
+        "p95_ms": 139.914,
+        "std_ms": 0.301,
+        "min_ms": 139.09,
+        "max_ms": 141.324,
+        "throughput_ips": 114.7,
+        "speedup_vs_fp16": 0.64
+      },
+      "64": {
+        "mean_ms": 496.014,
+        "median_ms": 495.88,
+        "p90_ms": 496.736,
+        "p95_ms": 497.066,
+        "std_ms": 0.634,
+        "min_ms": 495.094,
+        "max_ms": 499.248,
+        "throughput_ips": 129.0,
+        "speedup_vs_fp16": 0.619
+      }
+    },
+    "lsq_int8_fp16": {
+      "1": {
+        "mean_ms": 37.653,
+        "median_ms": 37.654,
+        "p90_ms": 37.84,
+        "p95_ms": 38.035,
+        "std_ms": 0.21,
+        "min_ms": 37.245,
+        "max_ms": 38.454,
+        "throughput_ips": 26.6,
+        "speedup_vs_fp16": 0.692
+      },
+      "4": {
+        "mean_ms": 51.854,
+        "median_ms": 51.829,
+        "p90_ms": 52.163,
+        "p95_ms": 52.27,
+        "std_ms": 0.264,
+        "min_ms": 51.394,
+        "max_ms": 53.268,
+        "throughput_ips": 77.1,
+        "speedup_vs_fp16": 0.791
+      },
+      "16": {
+        "mean_ms": 99.942,
+        "median_ms": 99.843,
+        "p90_ms": 100.276,
+        "p95_ms": 100.763,
+        "std_ms": 0.525,
+        "min_ms": 99.454,
+        "max_ms": 103.48,
+        "throughput_ips": 160.1,
+        "speedup_vs_fp16": 0.894
+      },
+      "64": {
+        "mean_ms": 316.754,
+        "median_ms": 316.653,
+        "p90_ms": 317.368,
+        "p95_ms": 317.648,
+        "std_ms": 0.5,
+        "min_ms": 315.9,
+        "max_ms": 319.017,
+        "throughput_ips": 202.0,
+        "speedup_vs_fp16": 0.969
+      }
+    }
+  },
+  "e2e_throughput": {
+    "fp32": {
+      "total_images": 50,
+      "total_time_s": 1.315,
+      "throughput_ips": 38.0,
+      "avg_batch_ms": 187.79,
+      "batches_processed": 7,
+      "speedup_vs_fp16": 1.005
+    },
+    "fp16": {
+      "total_images": 50,
+      "total_time_s": 1.324,
+      "throughput_ips": 37.8,
+      "avg_batch_ms": 189.19,
+      "batches_processed": 7,
+      "speedup_vs_fp16": 1.0
+    },
+    "lsq_int8_fp32": {
+      "total_images": 50,
+      "total_time_s": 1.364,
+      "throughput_ips": 36.7,
+      "avg_batch_ms": 194.79,
+      "batches_processed": 7,
+      "speedup_vs_fp16": 0.971
+    },
+    "lsq_int8_fp16": {
+      "total_images": 50,
+      "total_time_s": 1.323,
+      "throughput_ips": 37.8,
+      "avg_batch_ms": 188.98,
+      "batches_processed": 7,
+      "speedup_vs_fp16": 1.0
+    }
+  },
+  "profiling": {
+    "fp32": {
+      "1": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/fp32_b1_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "4": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/fp32_b4_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "16": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/fp32_b16_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "64": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/fp32_b64_chrome_trace.json",
+        "top_cuda_kernels": []
+      }
+    },
+    "fp16": {
+      "1": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/fp16_b1_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "4": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/fp16_b4_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "16": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/fp16_b16_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "64": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/fp16_b64_chrome_trace.json",
+        "top_cuda_kernels": []
+      }
+    },
+    "lsq_int8_fp32": {
+      "1": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/lsq_int8_fp32_b1_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "4": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/lsq_int8_fp32_b4_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "16": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/lsq_int8_fp32_b16_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "64": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/lsq_int8_fp32_b64_chrome_trace.json",
+        "top_cuda_kernels": []
+      }
+    },
+    "lsq_int8_fp16": {
+      "1": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/lsq_int8_fp16_b1_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "4": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/lsq_int8_fp16_b4_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "16": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/lsq_int8_fp16_b16_chrome_trace.json",
+        "top_cuda_kernels": []
+      },
+      "64": {
+        "chrome_trace": "/home/aachubov/untitled/clean_pipe/results/profiler_traces/lsq_int8_fp16_b64_chrome_trace.json",
+        "top_cuda_kernels": []
+      }
+    }
+  }
+}
