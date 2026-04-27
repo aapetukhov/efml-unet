@@ -1,0 +1,25 @@
+{
+  "method": "lsq_lsq_ptq",
+  "timestamp": "2026-04-25T23:41:25.481527",
+  "checkpoint_in": "checkpoints/heavy_srunet_29M.pt",
+  "compiled": false,
+  "n_bits_w": 8,
+  "n_bits_a": 8,
+  "quantize_activations": false,
+  "skip_depthwise": false,
+  "skip_first_last": true,
+  "fp32": {
+    "ssim": 0.7689,
+    "latency_ms": 492.19,
+    "size_mb": 111.66
+  },
+  "lsq_int8": {
+    "ssim": 0.7681,
+    "latency_ms": 501.4,
+    "size_mb": 28.27
+  },
+  "speedup": 0.98,
+  "ssim_drop": 0.0008,
+  "compression_ratio": 3.95,
+  "quantized_layers": 39
+}
